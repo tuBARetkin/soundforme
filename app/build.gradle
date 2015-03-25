@@ -1,0 +1,4 @@
+apply plugin: 'spring-boot'
+dependencies{
+    compile project(':collector')
+}

@@ -1,0 +1,54 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.2.RELEASE")
+    }
+}
+
+allprojects {
+    group = 'org.soundforme'
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "groovy"
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        //spring
+        compile 'org.springframework:spring-context:4.1.5.RELEASE'
+        compile 'org.springframework.data:spring-data-mongodb:1.7.0.RELEASE'
+        compile 'org.springframework.boot:spring-boot-starter-web:1.2.2.RELEASE'
+
+        //logging
+        compile 'org.slf4j:slf4j-api:1.7.10'
+        compile 'ch.qos.logback:logback-classic:1.1.2'
+
+        //utils
+        compile 'com.google.guava:guava:18.0'
+        compile 'commons-io:commons-io:2.4'
+        compile 'org.apache.httpcomponents:httpclient:4.4'
+
+        //misc
+        compile 'javax.inject:javax.inject:1'
+
+        //tests
+        testCompile 'org.codehaus.groovy:groovy-all:2.4.2'
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'org.assertj:assertj-core:2.0.0'
+        testCompile 'org.springframework:spring-test:4.1.5.RELEASE'
+        testCompile 'org.spockframework:spock-spring:1.0-groovy-2.4'
+
+    }
+
+    test {
+        testLogging.showStandardStreams = true
+    }
+}
+
+
