@@ -1,13 +1,13 @@
 package org.soundforme.collector.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 /**
  * @author NGorelov
  */
-public abstract class PaginatedResource {
+public class ReleasesPage {
     private Pagination pagination;
+    private List<ReleaseLink> releases;
 
     public Pagination getPagination() {
         return pagination;
@@ -15,5 +15,13 @@ public abstract class PaginatedResource {
 
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
+    }
+
+    public List<ReleaseLink> getReleases() {
+        return releases;
+    }
+
+    public void setReleases(List<ReleaseLink> releases) {
+        this.releases = releases;
     }
 }

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author NGorelov
  */
-public class ArtistReleaseLink {
+public class ReleaseLink {
     private Integer id;
     @SerializedName("resource_url")
     private String resourceUrl;

@@ -1,7 +1,5 @@
 package org.soundforme.collector
 
-import org.soundforme.collector.model.ArtistReleasesPage
-import org.soundforme.collector.model.PaginatedResource
 import org.soundforme.config.SharedConfig
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
@@ -16,81 +14,117 @@ import static org.assertj.core.api.Assertions.assertThat
 @ContextConfiguration(classes = SharedConfig.class)
 class DiscogsStoreSpecification extends Specification {
     private static final int KISS_BAND_ID = 153073;
+    private static final int MERCURY_LABEL_ID = 39357;
     private static final int ALIVE_ALBUM_ID = 702835;
 
     @Inject
     private DiscogsStore discogsStore;
 
-    def "getResource(id, page, resultType) should not work with id < 1"(){
+    def "getting release should not work with id < 1"(){
         when:
-            discogsStore.getResource(0, 1, ArtistReleasesPage.class);
+        discogsStore.getReleaseResource(0);
+
         then:
-            def e = thrown(NullPointerException)
-            assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("id should be defined")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
     }
 
-    def "getResource(id, page, resultType) should not work with nullable result type"(){
+    def "getting artist releases should not work with id < 1"(){
         when:
-        discogsStore.getResource(1, 1, ArtistReleasesPage.class);
+        discogsStore.getArtistReleasesPage(0, 1);
+
         then:
-        def e = thrown(NullPointerException)
-        assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("result type should be defined")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
     }
 
-    def "getResource(id, page, resultType) should not work with page < 1"() {
+
+    def "getting label releases should not work with id < 1"(){
         when:
-            discogsStore.getResource(1, 0, ArtistReleasesPage.class);
+        discogsStore.getLabelReleasesPage(0, 1);
+
         then:
-            def e = thrown(IllegalArgumentException)
-            assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("page number")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
     }
 
-    def "getResource(id, page, resultType) should work with null page"() {
+    def "getting artist releases should not work with page < 1"(){
         when:
-            discogsStore.getResource(1, null, ArtistReleasesPage.class);
+        discogsStore.getArtistReleasesPage(1, 0);
+
         then:
-            notThrown(NullPointerException)
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Page number")
     }
 
-    def "getResource(id, page, resultType) should not work with type that does not present in apiPatterns"() {
+    def "getting label releases should not work with page < 1"(){
         when:
-            discogsStore.getResource(1, 1, new PaginatedResource(){} as Class);
+        discogsStore.getLabelReleasesPage(1, 0);
+
         then:
-            def e = thrown(IllegalArgumentException)
-            assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("result type should be")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Page number")
     }
 
-    def "getResource(id, page, resultType) should return any existing page of artist releases"(){
+    def "getting artist releases should return any existing page of artist releases"(){
         setup: "setting up 'Kiss' band id from discogs service"
-            def artistId = KISS_BAND_ID
+        def artistId = KISS_BAND_ID
+
         when:
-            def firstPage = discogsStore.getResource(artistId, 1, ArtistReleasesPage.class);
-            def secondPage = discogsStore.getResource(artistId, 2, ArtistReleasesPage.class);
-            def lastPage = discogsStore.getResource(artistId, secondPage.pagination.pages, ArtistReleasesPage.class);
+        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1);
+        def secondPage = discogsStore.getArtistReleasesPage(artistId, 2);
+        def lastPage = discogsStore.getArtistReleasesPage(artistId, secondPage.pagination.pages);
+
         then:
-            assertThat(firstPage.pagination.page).isEqualTo(1)
-            assertThat(secondPage.pagination.page).isEqualTo(2)
-            assertThat(lastPage.pagination.page).isEqualTo(firstPage.pagination.pages)
+        assertThat(firstPage.pagination.page).isEqualTo(1)
+        assertThat(secondPage.pagination.page).isEqualTo(2)
+        assertThat(lastPage.pagination.page).isEqualTo(firstPage.pagination.pages)
     }
 
-    def "getResource(id, page, resultType) should return not empty releases list"(){
+    def "getting artist releases should return not empty releases list"(){
         setup: "setting up 'Kiss' band id from discogs service"
-            def artistId = KISS_BAND_ID
+        def artistId = KISS_BAND_ID
+
         when:
-            def firstPage = discogsStore.getResource(artistId, 1, ArtistReleasesPage.class);
+        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1);
+
         then:
-            assertThat(firstPage.releases).isNotNull()
-                    .isNotEmpty()
-                    .doesNotContainNull()
-                    .hasSize(50)
-                    .extracting("id", "resourceUrl")
-                    .isNotEmpty()
+        assertThat(firstPage.releases).isNotNull()
+                .isNotEmpty()
+                .doesNotContainNull()
+                .hasSize(100)
+                .extracting("id", "resourceUrl")
+                .isNotEmpty()
     }
 
-    def "getResource(id, resultType) should return not pageable object"(){
-        setup: "setting up 'Kiss ‎– Alive!' album id"
-            def releaseId = ALIVE_ALBUM_ID;
+    def "getting label releases should return any existing page of artist releases"(){
+        setup: "setting up 'Casablanca' label id from discogs service"
+        def labelId = MERCURY_LABEL_ID
+
         when:
-            def releae = discogsStore.getResource(releaseId, )
+        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1);
+        def secondPage = discogsStore.getLabelReleasesPage(labelId, 2);
+        def lastPage = discogsStore.getLabelReleasesPage(labelId, secondPage.pagination.pages);
+
+        then:
+        assertThat(firstPage.pagination.page).isEqualTo(1)
+        assertThat(secondPage.pagination.page).isEqualTo(2)
+        assertThat(lastPage.pagination.page).isEqualTo(firstPage.pagination.pages)
+    }
+
+    def "getting label releases should return not empty releases list"(){
+        setup: "setting up 'Mercury' label id from discogs service"
+        def labelId = MERCURY_LABEL_ID
+
+        when:
+        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1);
+
+        then:
+        assertThat(firstPage.releases).isNotNull()
+                .isNotEmpty()
+                .doesNotContainNull()
+                .hasSize(100)
+                .extracting("id", "resourceUrl")
+                .isNotEmpty()
     }
 }

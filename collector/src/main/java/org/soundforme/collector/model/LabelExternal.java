@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author NGorelov
  */
-public class Label {
+public class LabelExternal {
     private Integer id;
     @SerializedName("catno")
     private String catNo;

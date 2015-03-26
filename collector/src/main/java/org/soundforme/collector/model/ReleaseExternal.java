@@ -2,7 +2,6 @@ package org.soundforme.collector.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -11,7 +10,8 @@ import java.util.Set;
 public class ReleaseExternal {
     private Integer id;
     private String title;
-    private Set<Artist> artists;
+    private Set<ArtistExternal> artists;
+    private Set<LabelExternal> labels;
     @SerializedName("released")
     private String date;
     private Set<TrackExternal> tracklist;
@@ -32,12 +32,20 @@ public class ReleaseExternal {
         this.title = title;
     }
 
-    public Set<Artist> getArtists() {
+    public Set<ArtistExternal> getArtists() {
         return artists;
     }
 
-    public void setArtists(Set<Artist> artists) {
+    public void setArtists(Set<ArtistExternal> artists) {
         this.artists = artists;
+    }
+
+    public Set<LabelExternal> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Set<LabelExternal> labels) {
+        this.labels = labels;
     }
 
     public String getDate() {

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author NGorelov
  */
-public class Artist {
+public class ArtistExternal {
     private Integer id;
     private String name;
 
