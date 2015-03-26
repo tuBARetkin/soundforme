@@ -11,6 +11,7 @@ public class LabelExternal {
     private Integer id;
     @SerializedName("catno")
     private String catNo;
+    private String name;
 
     public Integer getId() {
         return id;
@@ -26,5 +27,13 @@ public class LabelExternal {
 
     public void setCatNo(String catNo) {
         this.catNo = catNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
