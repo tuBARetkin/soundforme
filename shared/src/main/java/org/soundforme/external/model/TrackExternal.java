@@ -1,4 +1,4 @@
-package org.soundforme.collector.model;
+package org.soundforme.external.model;
 
 /**
  * @author NGorelov

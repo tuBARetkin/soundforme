@@ -1,5 +1,0 @@
-dependencies{
-    compile project(':shared')
-    compile 'org.jsoup:jsoup:1.8.1'
-    compile 'com.google.code.gson:gson:2.3.1'
-}

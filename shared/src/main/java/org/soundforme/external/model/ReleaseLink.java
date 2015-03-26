@@ -1,8 +1,6 @@
-package org.soundforme.collector.model;
+package org.soundforme.external.model;
 
 import com.google.gson.annotations.SerializedName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author NGorelov

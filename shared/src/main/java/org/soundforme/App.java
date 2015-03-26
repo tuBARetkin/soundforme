@@ -1,6 +1,5 @@
 package org.soundforme;
 
-import org.soundforme.config.MongoConfig;
 import org.soundforme.config.SharedConfig;
 import org.soundforme.model.Subscription;
 import org.soundforme.repositories.SubscriptionRepository;

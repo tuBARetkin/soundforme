@@ -1,4 +1,4 @@
-package org.soundforme.collector;
+package org.soundforme.external;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

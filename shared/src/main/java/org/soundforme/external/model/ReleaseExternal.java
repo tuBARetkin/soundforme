@@ -1,4 +1,4 @@
-package org.soundforme.collector.model;
+package org.soundforme.external.model;
 
 import com.google.gson.annotations.SerializedName;
 

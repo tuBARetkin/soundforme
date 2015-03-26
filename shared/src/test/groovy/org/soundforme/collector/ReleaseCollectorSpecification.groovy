@@ -1,11 +1,10 @@
 package org.soundforme.collector
 
 import groovy.util.logging.Slf4j
-import org.assertj.core.api.Assertions
 import org.soundforme.config.SharedConfig
+import org.soundforme.external.ReleaseCollector
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
-import org.soundforme.repositories.SubscriptionRepository
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 

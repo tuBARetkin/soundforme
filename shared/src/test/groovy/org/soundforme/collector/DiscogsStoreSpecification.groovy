@@ -1,6 +1,8 @@
 package org.soundforme.collector
 
-import org.soundforme.collector.model.ReleaseExternal
+import org.soundforme.external.DiscogsConnectionException
+import org.soundforme.external.DiscogsStore
+import org.soundforme.external.model.ReleaseExternal
 import org.soundforme.config.SharedConfig
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification

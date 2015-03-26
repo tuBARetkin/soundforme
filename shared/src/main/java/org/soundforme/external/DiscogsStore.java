@@ -1,12 +1,12 @@
-package org.soundforme.collector;
+package org.soundforme.external;
 
 import com.google.gson.Gson;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.soundforme.collector.model.ReleaseExternal;
-import org.soundforme.collector.model.ReleasesPage;
+import org.soundforme.external.model.ReleaseExternal;
+import org.soundforme.external.model.ReleasesPage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -42,11 +42,11 @@ public class DiscogsStore {
         return getResource(id, null, ReleaseExternal.class, basicUrl + "releases/{0}");
     }
 
-    public ReleasesPage getArtistReleasesPage(int id, int page){
+    public ReleasesPage getArtistReleasesPage(int id, int page) {
         return getResource(id, page, ReleasesPage.class, basicUrl + "artists/{0}/releases");
     }
 
-    public ReleasesPage getLabelReleasesPage(int id, int page){
+    public ReleasesPage getLabelReleasesPage(int id, int page) {
         return getResource(id, page, ReleasesPage.class, basicUrl + "labels/{0}/releases");
     }
 
