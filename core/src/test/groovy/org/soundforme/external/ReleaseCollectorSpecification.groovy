@@ -1,8 +1,7 @@
-package org.soundforme.collector
+package org.soundforme.external
 
 import groovy.util.logging.Slf4j
 import org.soundforme.config.SharedConfig
-import org.soundforme.external.ReleaseCollector
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
 import org.springframework.test.context.ContextConfiguration

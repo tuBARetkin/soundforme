@@ -23,7 +23,6 @@ subprojects {
         //spring
         compile 'org.springframework:spring-context:4.1.5.RELEASE'
         compile 'org.springframework.data:spring-data-mongodb:1.7.0.RELEASE'
-        compile 'org.springframework.boot:spring-boot-starter-web:1.2.2.RELEASE'
 
         //logging
         compile 'org.slf4j:slf4j-api:1.7.10'
@@ -33,6 +32,7 @@ subprojects {
         compile 'com.google.guava:guava:18.0'
         compile 'commons-io:commons-io:2.4'
         compile 'org.apache.httpcomponents:httpclient:4.4'
+        compile 'com.google.code.gson:gson:2.3.1'
 
         //misc
         compile 'javax.inject:javax.inject:1'
