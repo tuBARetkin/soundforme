@@ -16,8 +16,8 @@ public class Subscription {
 
     private String title;
     private SubscriptionType type;
-    private String discogsId;
-    private Set<String> collectedReleases;
+    private Integer discogsId;
+    private Set<Integer> collectedReleases;
 
     @DBRef
     private Set<Release> releases;
@@ -42,11 +42,11 @@ public class Subscription {
         this.type = type;
     }
 
-    public String getDiscogsId() {
+    public Integer getDiscogsId() {
         return discogsId;
     }
 
-    public void setDiscogsId(String discogsId) {
+    public void setDiscogsId(Integer discogsId) {
         this.discogsId = discogsId;
     }
 
@@ -56,5 +56,13 @@ public class Subscription {
 
     public void setReleases(Set<Release> releases) {
         this.releases = releases;
+    }
+
+    public Set<Integer> getCollectedReleases() {
+        return collectedReleases;
+    }
+
+    public void setCollectedReleases(Set<Integer> collectedReleases) {
+        this.collectedReleases = collectedReleases;
     }
 }

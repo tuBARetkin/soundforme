@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -28,25 +32,30 @@ public class DiscogsStore {
     @Inject
     private Gson gson;
 
-    private <T> T getResource(int id, Integer page, Class<T> resultType, String pattern) {
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
+
+    private <T> Future<T> getResource(int id, Integer page, Class<T> resultType, String pattern) {
         checkArgument(id > 0, "Release id should be bigger then 1");
         checkArgument(page == null || page > 0, "Page number should be more then zero or null");
 
         String url = MessageFormat.format(pattern, "" + id);
         logger.debug("Collecting info from url: {}", url);
-        String result = getContent(url, page);
-        return gson.fromJson(result, resultType);
+
+        return scheduledExecutorService.schedule(() -> {
+            String result = getContent(url, page);
+            return gson.fromJson(result, resultType);
+        }, 1, TimeUnit.SECONDS);
     }
 
-    public ReleaseExternal getReleaseResource(int id) {
+    public Future<ReleaseExternal> getReleaseResource(int id) {
         return getResource(id, null, ReleaseExternal.class, basicUrl + "releases/{0}");
     }
 
-    public ReleasesPage getArtistReleasesPage(int id, int page) {
+    public Future<ReleasesPage> getArtistReleasesPage(int id, int page) {
         return getResource(id, page, ReleasesPage.class, basicUrl + "artists/{0}/releases");
     }
 
-    public ReleasesPage getLabelReleasesPage(int id, int page) {
+    public Future<ReleasesPage> getLabelReleasesPage(int id, int page) {
         return getResource(id, page, ReleasesPage.class, basicUrl + "labels/{0}/releases");
     }
 
@@ -65,6 +74,7 @@ public class DiscogsStore {
 
             return connection.execute().body();
         } catch (IOException e) {
+            logger.debug("Error on connecting to url {} with page {}", url, page);
             throw new DiscogsConnectionException("Error on connection to discogs", e);
         }
     }

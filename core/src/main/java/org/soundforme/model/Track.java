@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Track {
     private String title;
-    private String length;
-    private String number;
+    private String duration;
+    private String position;
 
     public String getTitle() {
         return title;
@@ -19,19 +19,19 @@ public class Track {
         this.title = title;
     }
 
-    public String getLength() {
-        return length;
+    public String getDuration() {
+        return duration;
     }
 
-    public void setLength(String length) {
-        this.length = length;
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
-    public String getNumber() {
-        return number;
+    public String getPosition() {
+        return position;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

@@ -2,6 +2,7 @@ package org.soundforme.external
 
 import groovy.util.logging.Slf4j
 import org.soundforme.config.SharedConfig
+import org.soundforme.model.Release
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
 import org.springframework.test.context.ContextConfiguration
@@ -20,7 +21,7 @@ class ReleaseCollectorSpecification extends Specification {
     @Inject
     private ReleaseCollector releaseCollector;
 
-    def "collectAll(subscription) should not work with nullable subscription"() {
+    def "collecting should not work with nullable subscription"() {
         when:
             releaseCollector.collectAll(null)
         then:
@@ -28,10 +29,10 @@ class ReleaseCollectorSpecification extends Specification {
             assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("subscription should be defined")
     }
 
-    def "collectAll(subscription) should not work with subscription of null type"() {
+    def "collecting should not work with subscription of null type"() {
         setup:
             def subscription = new Subscription()
-            subscription.setDiscogsId("test");
+            subscription.setDiscogsId(1);
         when:
             releaseCollector.collectAll(new Subscription())
         then:
@@ -39,7 +40,7 @@ class ReleaseCollectorSpecification extends Specification {
             assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("type of subscription")
     }
 
-    def "collectAll(subscription) should not work without discogs id"() {
+    def "collecting should not work without discogs id"() {
         setup:
             def subscription = new Subscription()
             subscription.setType(SubscriptionType.ARTIST)
@@ -48,5 +49,16 @@ class ReleaseCollectorSpecification extends Specification {
         then:
             def e = thrown(IllegalArgumentException)
             assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("id from discogs")
+    }
+
+    def "test"() {
+        setup:
+        Subscription subscription = new Subscription()
+        subscription.setDiscogsId(39357)
+        subscription.setType(SubscriptionType.LABEL)
+        when:
+        Set<Release> releases = releaseCollector.collectAll(subscription);
+        then:
+        releases.isEmpty()
     }
 }

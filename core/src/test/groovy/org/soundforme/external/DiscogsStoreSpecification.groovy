@@ -6,6 +6,7 @@ import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 import javax.inject.Inject
+import java.util.concurrent.ExecutionException
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.assertj.core.api.Assertions.tuple
@@ -25,7 +26,7 @@ class DiscogsStoreSpecification extends Specification {
 
     def "getting release should not work with id < 1"() {
         when:
-        discogsStore.getReleaseResource(0)
+        discogsStore.getReleaseResource(0).get()
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -34,7 +35,7 @@ class DiscogsStoreSpecification extends Specification {
 
     def "getting artist releases should not work with id < 1"() {
         when:
-        discogsStore.getArtistReleasesPage(0, 1)
+        discogsStore.getArtistReleasesPage(0, 1).get()
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -44,7 +45,7 @@ class DiscogsStoreSpecification extends Specification {
 
     def "getting label releases should not work with id < 1"() {
         when:
-        discogsStore.getLabelReleasesPage(0, 1)
+        discogsStore.getLabelReleasesPage(0, 1).get()
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -53,7 +54,7 @@ class DiscogsStoreSpecification extends Specification {
 
     def "getting artist releases should not work with page < 1"() {
         when:
-        discogsStore.getArtistReleasesPage(1, 0)
+        discogsStore.getArtistReleasesPage(1, 0).get()
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -62,7 +63,7 @@ class DiscogsStoreSpecification extends Specification {
 
     def "getting label releases should not work with page < 1"() {
         when:
-        discogsStore.getLabelReleasesPage(1, 0)
+        discogsStore.getLabelReleasesPage(1, 0).get()
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -74,9 +75,9 @@ class DiscogsStoreSpecification extends Specification {
         def artistId = KISS_BAND_ID
 
         when:
-        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1)
-        def secondPage = discogsStore.getArtistReleasesPage(artistId, 2)
-        def lastPage = discogsStore.getArtistReleasesPage(artistId, secondPage.pagination.pages)
+        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1).get()
+        def secondPage = discogsStore.getArtistReleasesPage(artistId, 2).get()
+        def lastPage = discogsStore.getArtistReleasesPage(artistId, secondPage.pagination.pages).get()
 
         then:
         assertThat(firstPage.pagination.page).isEqualTo(1)
@@ -89,7 +90,7 @@ class DiscogsStoreSpecification extends Specification {
         def artistId = KISS_BAND_ID
 
         when:
-        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1)
+        def firstPage = discogsStore.getArtistReleasesPage(artistId, 1).get()
 
         then:
         assertThat(firstPage.releases).isNotNull()
@@ -105,11 +106,11 @@ class DiscogsStoreSpecification extends Specification {
         def illegalId = 11111111
 
         when:
-        discogsStore.getArtistReleasesPage(illegalId, 1)
+        discogsStore.getArtistReleasesPage(illegalId, 1).get()
 
         then:
-        def e = thrown(DiscogsConnectionException)
-        assertThat(e).isInstanceOf(DiscogsConnectionException).hasMessage("Error on connection to discogs")
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
     }
 
     def "getting artist releases should not work with unbounded page"() {
@@ -117,11 +118,11 @@ class DiscogsStoreSpecification extends Specification {
         def pageNumber = 100
 
         when:
-        discogsStore.getArtistReleasesPage(KISS_BAND_ID, pageNumber)
+        discogsStore.getArtistReleasesPage(KISS_BAND_ID, pageNumber).get()
 
         then:
-        def e = thrown(DiscogsConnectionException)
-        assertThat(e).isInstanceOf(DiscogsConnectionException).hasMessage("Error on connection to discogs")
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
     }
 
     def "getting label releases should return any existing page of artist releases"() {
@@ -129,9 +130,9 @@ class DiscogsStoreSpecification extends Specification {
         def labelId = MERCURY_LABEL_ID
 
         when:
-        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1)
-        def secondPage = discogsStore.getLabelReleasesPage(labelId, 2)
-        def lastPage = discogsStore.getLabelReleasesPage(labelId, secondPage.pagination.pages)
+        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1).get()
+        def secondPage = discogsStore.getLabelReleasesPage(labelId, 2).get()
+        def lastPage = discogsStore.getLabelReleasesPage(labelId, secondPage.pagination.pages).get()
 
         then:
         assertThat(firstPage.pagination.page).isEqualTo(1)
@@ -144,7 +145,7 @@ class DiscogsStoreSpecification extends Specification {
         def labelId = MERCURY_LABEL_ID
 
         when:
-        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1)
+        def firstPage = discogsStore.getLabelReleasesPage(labelId, 1).get()
 
         then:
         assertThat(firstPage.releases).isNotNull()
@@ -160,11 +161,11 @@ class DiscogsStoreSpecification extends Specification {
         def illegalId = 11111111
 
         when:
-        discogsStore.getLabelReleasesPage(illegalId, 1)
+        discogsStore.getLabelReleasesPage(illegalId, 1).get()
 
         then:
-        def e = thrown(DiscogsConnectionException)
-        assertThat(e).isInstanceOf(DiscogsConnectionException).hasMessage("Error on connection to discogs")
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
     }
 
     def "getting label releases should not work with unbounded page"() {
@@ -172,11 +173,11 @@ class DiscogsStoreSpecification extends Specification {
         def pageNumber = 100
 
         when:
-        discogsStore.getLabelReleasesPage(KISS_BAND_ID, pageNumber)
+        discogsStore.getLabelReleasesPage(KISS_BAND_ID, pageNumber).get()
 
         then:
-        def e = thrown(DiscogsConnectionException)
-        assertThat(e).isInstanceOf(DiscogsConnectionException).hasMessage("Error on connection to discogs")
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
     }
 
     def "getting release should return object with filled artist, label, title and tracklist fields"() {
@@ -184,7 +185,7 @@ class DiscogsStoreSpecification extends Specification {
         def releaseId = ALIVE_ALBUM_ID
 
         when:
-        ReleaseExternal release = discogsStore.getReleaseResource(releaseId)
+        ReleaseExternal release = discogsStore.getReleaseResource(releaseId).get()
 
         then:
         assertThat(release).isNotNull()
@@ -205,10 +206,16 @@ class DiscogsStoreSpecification extends Specification {
         def illegalId = 11111111
 
         when:
-        discogsStore.getReleaseResource(illegalId)
+        discogsStore.getReleaseResource(illegalId).get()
 
         then:
-        def e = thrown(DiscogsConnectionException)
-        assertThat(e).isInstanceOf(DiscogsConnectionException).hasMessage("Error on connection to discogs")
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
+    }
+
+    def static assertDiscogsConnectionException(Throwable e){
+        assertThat(e).isInstanceOf(ExecutionException)
+                .hasCauseInstanceOf(DiscogsConnectionException)
+                .hasMessageContaining("Error on connection to discogs")
     }
 }
