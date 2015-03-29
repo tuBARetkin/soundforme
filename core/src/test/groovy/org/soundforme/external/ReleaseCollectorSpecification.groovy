@@ -11,6 +11,7 @@ import spock.lang.Specification
 import javax.inject.Inject
 
 import static org.assertj.core.api.Assertions.assertThat
+import static org.assertj.core.api.Assertions.tuple
 
 /**
  * @author NGorelov
@@ -23,42 +24,54 @@ class ReleaseCollectorSpecification extends Specification {
 
     def "collecting should not work with nullable subscription"() {
         when:
-            releaseCollector.collectAll(null)
+        releaseCollector.collectAll(null)
         then:
-            def e = thrown(NullPointerException)
-            assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("subscription should be defined")
+        def e = thrown(NullPointerException)
+        assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("subscription should be defined")
     }
 
     def "collecting should not work with subscription of null type"() {
         setup:
-            def subscription = new Subscription()
-            subscription.setDiscogsId(1);
+        def subscription = new Subscription()
+        subscription.setDiscogsId(1);
         when:
-            releaseCollector.collectAll(new Subscription())
+        releaseCollector.collectAll(new Subscription())
         then:
-            def e = thrown(IllegalArgumentException)
-            assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("type of subscription")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("type of subscription")
     }
 
     def "collecting should not work without discogs id"() {
         setup:
-            def subscription = new Subscription()
-            subscription.setType(SubscriptionType.ARTIST)
+        def subscription = new Subscription()
+        subscription.setType(SubscriptionType.ARTIST)
         when:
-            releaseCollector.collectAll(subscription)
+        releaseCollector.collectAll(subscription)
         then:
-            def e = thrown(IllegalArgumentException)
-            assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("id from discogs")
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("id from discogs")
     }
 
-    def "test"() {
+    def "collector should results from all page with no empty artist, title and tracklist"() {
         setup:
         Subscription subscription = new Subscription()
-        subscription.setDiscogsId(25386)
+        subscription.setDiscogsId(205362)
         subscription.setType(SubscriptionType.LABEL)
+
         when:
         Set<Release> releases = releaseCollector.collectAll(subscription);
+
         then:
-        releases.isEmpty()
+        assertThat(releases).isNotNull()
+                .isNotEmpty()
+                .hasSize(54)
+        assertThat(releases).extracting("artist", "title")
+                .doesNotContainNull()
+                .doesNotContain(tuple(""))
+        releases.forEach({release ->
+            assertThat(release.getTrackList()).extracting("title")
+                .doesNotContain("")
+                .doesNotContainNull()
+        })
     }
 }
