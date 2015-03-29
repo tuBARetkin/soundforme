@@ -3,6 +3,7 @@ package org.soundforme.external.model;
 import com.google.gson.annotations.SerializedName;
 import org.soundforme.model.Track;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,7 +16,7 @@ public class ReleaseExternal {
     private Set<LabelExternal> labels;
     @SerializedName("released")
     private String date;
-    private Set<Track> tracklist;
+    private List<Track> tracklist;
 
     public Integer getId() {
         return id;
@@ -57,11 +58,11 @@ public class ReleaseExternal {
         this.date = date;
     }
 
-    public Set<Track> getTracklist() {
+    public List<Track> getTracklist() {
         return tracklist;
     }
 
-    public void setTracklist(Set<Track> tracklist) {
+    public void setTracklist(List<Track> tracklist) {
         this.tracklist = tracklist;
     }
 }

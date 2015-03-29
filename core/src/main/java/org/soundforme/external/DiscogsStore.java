@@ -1,6 +1,7 @@
 package org.soundforme.external;
 
 import com.google.gson.Gson;
+import com.twitter.common.util.concurrent.RetryingFutureTask;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class DiscogsStore {
     @Inject
     private Gson gson;
 
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(20);
 
     private <T> Future<T> getResource(int id, Integer page, Class<T> resultType, String pattern) {
         checkArgument(id > 0, "Release id should be bigger then 1");
@@ -41,10 +42,10 @@ public class DiscogsStore {
         String url = MessageFormat.format(pattern, "" + id);
         logger.debug("Collecting info from url: {}", url);
 
-        return scheduledExecutorService.schedule(() -> {
+        return scheduledExecutorService.schedule(new RetriableTask<>(() -> {
             String result = getContent(url, page);
             return gson.fromJson(result, resultType);
-        }, 1, TimeUnit.SECONDS);
+        }), 1, TimeUnit.SECONDS);
     }
 
     public Future<ReleaseExternal> getReleaseResource(int id) {

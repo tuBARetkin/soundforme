@@ -58,7 +58,7 @@ public class ReleaseCollector {
             throw new ReleaseCollectingException("Error on loading first page of subscription", e);
         }
 
-        ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
+        ForkJoinPool forkJoinPool = new ForkJoinPool(8);
         return forkJoinPool.invoke(new CollectReleasesTask(
                 firstPage,
                 subscription.getCollectedReleases() == null ? newHashSet() : subscription.getCollectedReleases(),

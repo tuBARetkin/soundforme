@@ -37,6 +37,7 @@ subprojects {
         compile 'org.apache.httpcomponents:httpclient:4.4'
         compile 'com.google.code.gson:gson:2.3.1'
         compile 'com.twitter.common:util:0.0.116'
+        compile 'org.apache.commons:commons-lang3:3.3.2'
 
         //misc
         compile 'javax.inject:javax.inject:1'

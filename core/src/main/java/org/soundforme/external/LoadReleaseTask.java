@@ -6,6 +6,7 @@ import org.soundforme.external.model.ArtistExternal;
 import org.soundforme.external.model.LabelExternal;
 import org.soundforme.external.model.ReleaseExternal;
 import org.soundforme.model.Release;
+import org.soundforme.model.Track;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -37,14 +38,15 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
             result.setAdditionDate(LocalDateTime.now());
             result.setArtist(
                     releaseExternal.getArtists().stream()
-                    .map(ArtistExternal::getName)
-                    .collect(Collectors.joining(", "))
+                            .map(ArtistExternal::getName)
+                            .collect(Collectors.joining(", "))
             );
             result.setCatNo(
                     releaseExternal.getLabels().stream()
-                    .map(LabelExternal::getCatNo)
-                    .collect(Collectors.joining(", "))
+                            .map(LabelExternal::getCatNo)
+                            .collect(Collectors.joining(", "))
             );
+            result.setTrackList(releaseExternal.getTracklist());
             result.setChecked(false);
             result.setReleaseDate(releaseExternal.getDate());
             result.setTitle(releaseExternal.getTitle());

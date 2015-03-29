@@ -54,7 +54,7 @@ class ReleaseCollectorSpecification extends Specification {
     def "test"() {
         setup:
         Subscription subscription = new Subscription()
-        subscription.setDiscogsId(39357)
+        subscription.setDiscogsId(25386)
         subscription.setType(SubscriptionType.LABEL)
         when:
         Set<Release> releases = releaseCollector.collectAll(subscription);
