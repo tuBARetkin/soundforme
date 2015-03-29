@@ -54,7 +54,7 @@ public class ReleaseCollector {
             } else {
                 firstPage = discogsStore.getLabelReleasesPage(subscription.getDiscogsId(), 1).get();
             }
-        }catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new ReleaseCollectingException("Error on loading first page of subscription", e);
         }
 
