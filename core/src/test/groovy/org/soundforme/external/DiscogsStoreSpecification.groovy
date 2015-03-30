@@ -22,7 +22,7 @@ class DiscogsStoreSpecification extends Specification {
     private static final int CASABLANCA_LABEL_ID = 2152;
 
     @Inject
-    private DiscogsStore discogsStore;
+    def DiscogsStore discogsStore;
 
     def "getting release should not work with id < 1"() {
         when:

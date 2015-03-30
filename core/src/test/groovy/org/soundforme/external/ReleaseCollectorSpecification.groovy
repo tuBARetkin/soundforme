@@ -1,5 +1,4 @@
 package org.soundforme.external
-
 import groovy.util.logging.Slf4j
 import org.soundforme.config.SharedConfig
 import org.soundforme.model.Release
@@ -12,7 +11,6 @@ import javax.inject.Inject
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.assertj.core.api.Assertions.tuple
-
 /**
  * @author NGorelov
  */
@@ -20,11 +18,14 @@ import static org.assertj.core.api.Assertions.tuple
 @Slf4j
 class ReleaseCollectorSpecification extends Specification {
     @Inject
-    private ReleaseCollector releaseCollector;
+    def ReleaseCollector releaseCollector;
+    @Inject
+    def DiscogsStore discogsStore;
 
     def "collecting should not work with nullable subscription"() {
         when:
         releaseCollector.collectAll(null)
+
         then:
         def e = thrown(NullPointerException)
         assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("subscription should be defined")
@@ -33,9 +34,11 @@ class ReleaseCollectorSpecification extends Specification {
     def "collecting should not work with subscription of null type"() {
         setup:
         def subscription = new Subscription()
-        subscription.setDiscogsId(1);
+        subscription.discogsId = 1;
+
         when:
         releaseCollector.collectAll(new Subscription())
+
         then:
         def e = thrown(IllegalArgumentException)
         assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("type of subscription")
@@ -44,19 +47,55 @@ class ReleaseCollectorSpecification extends Specification {
     def "collecting should not work without discogs id"() {
         setup:
         def subscription = new Subscription()
-        subscription.setType(SubscriptionType.ARTIST)
+        subscription.type = SubscriptionType.ARTIST
+
         when:
         releaseCollector.collectAll(subscription)
+
         then:
         def e = thrown(IllegalArgumentException)
         assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("id from discogs")
     }
 
-    def "collector should results from all page with no empty artist, title and tracklist"() {
+    def "collector should results from all pages with not empty artist, title and tracklist"() {
         setup:
-        Subscription subscription = new Subscription()
-        subscription.setDiscogsId(205362)
-        subscription.setType(SubscriptionType.LABEL)
+        def xlr8rLabel = 103757;
+        def subscription = new Subscription([
+                discogsId: xlr8rLabel,
+                type: SubscriptionType.LABEL
+        ])
+
+        def pagination = discogsStore.getLabelReleasesPage(xlr8rLabel, 1).get().pagination
+        def releasesCount = pagination.items
+
+        when:
+        Set<Release> releases = releaseCollector.collectAll(subscription)
+
+        then:
+        assertThat(releases).isNotNull()
+                .isNotEmpty()
+                .hasSize(releasesCount)
+        assertThat(releases).extracting("artist", "title")
+                .doesNotContainNull()
+                .doesNotContain(tuple(""))
+        releases.forEach({release ->
+            assertThat(release.trackList).extracting("title")
+                    .doesNotContain("")
+                    .doesNotContainNull()
+        })
+    }
+
+    def "collector should not return already collected items"() {
+        setup:
+        def litCityTraxLabel = 403665
+        def subscription = new Subscription([
+                discogsId: litCityTraxLabel,
+                type: SubscriptionType.LABEL,
+                collectedReleases: [3663394, 4862147, 5030196, 6135073, 6441330]
+        ])
+
+        def pagination = discogsStore.getLabelReleasesPage(litCityTraxLabel, 1).get().pagination
+        def releasesCount = pagination.items
 
         when:
         Set<Release> releases = releaseCollector.collectAll(subscription);
@@ -64,14 +103,25 @@ class ReleaseCollectorSpecification extends Specification {
         then:
         assertThat(releases).isNotNull()
                 .isNotEmpty()
-                .hasSize(54)
-        assertThat(releases).extracting("artist", "title")
-                .doesNotContainNull()
-                .doesNotContain(tuple(""))
-        releases.forEach({release ->
-            assertThat(release.getTrackList()).extracting("title")
-                .doesNotContain("")
-                .doesNotContainNull()
-        })
+                .hasSize(releasesCount - subscription.collectedReleases.size())
     }
+
+    def "collector should not work with illegal artist or release source"() {
+        setup:
+        def illegalArtistPage = 111111111
+        def subscription = new Subscription([
+                discogsId: illegalArtistPage,
+                type: SubscriptionType.ARTIST
+        ])
+
+        when:
+        releaseCollector.collectAll(subscription)
+
+        then:
+        def e = thrown(ReleaseCollectingException)
+        assertThat(e).isInstanceOf(ReleaseCollectingException)
+                .hasMessageContaining("Error on loading first page of subscription")
+    }
+
+
 }

@@ -6,12 +6,9 @@ import org.soundforme.external.model.ArtistExternal;
 import org.soundforme.external.model.LabelExternal;
 import org.soundforme.external.model.ReleaseExternal;
 import org.soundforme.model.Release;
-import org.soundforme.model.Track;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
@@ -46,7 +43,11 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
                             .map(LabelExternal::getCatNo)
                             .collect(Collectors.joining(", "))
             );
-            result.setTrackList(releaseExternal.getTracklist());
+            result.setTrackList(
+                    releaseExternal.getTracklist().stream()
+                            .filter((track) -> !track.getTitle().isEmpty())
+                            .collect(Collectors.toList())
+            );
             result.setChecked(false);
             result.setReleaseDate(releaseExternal.getDate());
             result.setTitle(releaseExternal.getTitle());
