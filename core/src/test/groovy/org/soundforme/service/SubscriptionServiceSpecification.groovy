@@ -15,10 +15,16 @@ class SubscriptionServiceSpecification extends Specification {
 
     @Inject
     def SubscriptionRepository subscriptionRepository;
+    @Inject
+    def SubscriptionService subscriptionService;
 
-    def "test"() {
+    def "subscription service should save new subscription with automatic loaded title"() {
+        expect:
+        subscriptionService.follow(id).title == titles
 
-
+        where:
+        id << ["a153073", "l39357"]
+        titles << ["Kiss", "Mercury"]
     }
 
     void cleanup() {
