@@ -37,18 +37,32 @@ public class SubscriptionService {
 
         SubscriptionType type = stringId.charAt(0) == 'a' ? SubscriptionType.ARTIST : SubscriptionType.LABEL;
         int id = Integer.parseInt(stringId.substring(1).trim());
-        String title = type == SubscriptionType.ARTIST ? discogsStore.getArtistNameById(id) : discogsStore.getLabelTitleById(id);
 
-        if(title != null) {
-            Subscription subscription = new Subscription();
-            subscription.setDiscogsId(id);
-            subscription.setType(type);
-            subscription.setClosed(false);
-            subscription.setTitle(title);
-            return subscriptionRepository.save(subscription);
-        } else {
-            throw new DiscogsConnectionException("Resource " + stringId + " not found");
+        Subscription result = subscriptionRepository.findByDiscogsIdAndType(id, type);
+        if(result == null) {
+            String title = type == SubscriptionType.ARTIST ? discogsStore.getArtistNameById(id) : discogsStore.getLabelTitleById(id);
+            if(isNotBlank(title)) {
+                result = new Subscription();
+                result.setDiscogsId(id);
+                result.setType(type);
+                result.setClosed(false);
+                result.setTitle(title);
+                result = subscriptionRepository.save(result);
+                logger.info("New subscription {}/{} saved to db", id, type);
+            } else {
+                throw new DiscogsConnectionException("Resource " + stringId + " not found");
+            }
+        } else if (result.getClosed()){
+            result.setClosed(false);
+            result = subscriptionRepository.save(result);
+            logger.info("Changed 'closed' status of subscription {}/{}", id, type);
         }
+
+        return result;
+    }
+
+    public void refresh() {
+        throw new UnsupportedOperationException();
     }
 
     public void unsubscribe(Subscription subscription){
@@ -61,6 +75,6 @@ public class SubscriptionService {
     }
 
     public List<Subscription> findAll(){
-        return subscriptionRepository.findAll();
+        return subscriptionRepository.findByClosed(false);
     }
 }
