@@ -9,7 +9,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  * @author NGorelov
  */
 @Configuration
-@Import(value = MongoConfig.class)
+@Import(value = {MongoConfig.class, MongoTestConfig.class})
 @ComponentScan(basePackages = "org.soundforme")
 @PropertySource("classpath:app.properties")
 public class SharedConfig {

@@ -213,6 +213,40 @@ class DiscogsStoreSpecification extends Specification {
         assertDiscogsConnectionException(e)
     }
 
+    def "getting artist name should return not empty string"() {
+        when:
+        def bandName = discogsStore.getArtistNameById(KISS_BAND_ID)
+
+        then:
+        assertThat(bandName).isEqualTo("Kiss")
+    }
+
+    def "getting artist name should not throw exceptions in case of invalid id"() {
+        when:
+        def bandName = discogsStore.getArtistNameById(111111111)
+
+        then:
+        noExceptionThrown()
+        assertThat(bandName).isNull()
+    }
+
+    def "getting label name should return not empty string"() {
+        when:
+        def labelName = discogsStore.getLabelTitleById(MERCURY_LABEL_ID)
+
+        then:
+        assertThat(labelName).contains("Mercury")
+    }
+
+    def "getting label name should not throw exceptions in case of invalid id"() {
+        when:
+        def labelName = discogsStore.getArtistNameById(111111111)
+
+        then:
+        noExceptionThrown()
+        assertThat(labelName).isNull()
+    }
+
     def static assertDiscogsConnectionException(Throwable e){
         assertThat(e).isInstanceOf(ExecutionException)
                 .hasCauseInstanceOf(DiscogsConnectionException)

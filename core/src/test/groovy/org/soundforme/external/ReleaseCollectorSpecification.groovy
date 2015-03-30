@@ -1,5 +1,5 @@
 package org.soundforme.external
-import groovy.util.logging.Slf4j
+
 import org.soundforme.config.SharedConfig
 import org.soundforme.model.Release
 import org.soundforme.model.Subscription
@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.tuple
  * @author NGorelov
  */
 @ContextConfiguration(classes = SharedConfig.class)
-@Slf4j
 class ReleaseCollectorSpecification extends Specification {
     @Inject
     def ReleaseCollector releaseCollector;
@@ -57,7 +56,7 @@ class ReleaseCollectorSpecification extends Specification {
         assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("id from discogs")
     }
 
-    def "collector should results from all pages with not empty artist, title and tracklist"() {
+    def "collector should results from all pages with not empty artist, title, discogsId and tracklist"() {
         setup:
         def xlr8rLabel = 103757;
         def subscription = new Subscription([

@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 public class RetriableTask<T> implements Callable<T> {
     private final Logger logger = LoggerFactory.getLogger(RetriableTask.class);
 
-    private Callable<T> task;
+    private final Callable<T> task;
     public static final long DEFAULT_NUMBER_OF_RETRIES = 10;
     public static final int DEFAULT_WAIT_TIME = 5000;
 

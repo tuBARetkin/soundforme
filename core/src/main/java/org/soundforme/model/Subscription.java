@@ -18,6 +18,7 @@ public class Subscription {
     private SubscriptionType type;
     private Integer discogsId;
     private Set<Integer> collectedReleases;
+    private Boolean closed;
 
     @DBRef
     private Set<Release> releases;
@@ -64,5 +65,13 @@ public class Subscription {
 
     public void setCollectedReleases(Set<Integer> collectedReleases) {
         this.collectedReleases = collectedReleases;
+    }
+
+    public Boolean getClosed() {
+        return closed;
+    }
+
+    public void setClosed(Boolean closed) {
+        this.closed = closed;
     }
 }

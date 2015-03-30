@@ -12,12 +12,12 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  */
 @Configuration
 @EnableMongoRepositories(basePackages = "org.soundforme.repositories")
-@Profile("main")
-public class MongoConfig extends AbstractMongoConfiguration {
+@Profile("test")
+public class MongoTestConfig extends AbstractMongoConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return "soundforme";
+        return "soundforme-test";
     }
 
     @Override

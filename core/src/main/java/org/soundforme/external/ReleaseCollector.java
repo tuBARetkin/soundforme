@@ -6,7 +6,6 @@ import org.soundforme.external.model.ReleasesPage;
 import org.soundforme.model.Release;
 import org.soundforme.model.Subscription;
 import org.soundforme.model.SubscriptionType;
-import org.soundforme.repositories.ReleaseRepository;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -27,8 +26,6 @@ public class ReleaseCollector {
 
     @Inject
     private DiscogsStore discogsStore;
-    @Inject
-    private ReleaseRepository releaseRepository;
 
     public Set<Release> collectAll(Subscription subscription){
         checkNotNull(subscription, "subscription should be defined");

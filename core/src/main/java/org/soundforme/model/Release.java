@@ -15,6 +15,7 @@ import java.util.Set;
 public class Release {
     @Id
     private String id;
+    private Integer discogsId;
     private String artist;
     private String title;
     private String releaseDate;
@@ -28,6 +29,14 @@ public class Release {
 
     public String getId() {
         return id;
+    }
+
+    public Integer getDiscogsId() {
+        return discogsId;
+    }
+
+    public void setDiscogsId(Integer discogsId) {
+        this.discogsId = discogsId;
     }
 
     public String getArtist() {

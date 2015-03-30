@@ -38,6 +38,7 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
                             .map(ArtistExternal::getName)
                             .collect(Collectors.joining(", "))
             );
+            result.setDiscogsId(discogsId);
             result.setCatNo(
                     releaseExternal.getLabels().stream()
                             .map(LabelExternal::getCatNo)

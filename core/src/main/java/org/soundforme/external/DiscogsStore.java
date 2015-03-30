@@ -1,7 +1,6 @@
 package org.soundforme.external;
 
 import com.google.gson.Gson;
-import com.twitter.common.util.concurrent.RetryingFutureTask;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -14,10 +13,8 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -58,6 +55,26 @@ public class DiscogsStore {
 
     public Future<ReleasesPage> getLabelReleasesPage(int id, int page) {
         return getResource(id, page, ReleasesPage.class, basicUrl + "labels/{0}/releases");
+    }
+
+    public String getArtistNameById(int id) {
+        String result = null;
+        try {
+            result = (String) getResource(id, null, Map.class, basicUrl + "artists/{0}").get().get("name");
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Artist with id {} not found", id, e);
+        }
+        return result;
+    }
+
+    public String getLabelTitleById(int id) {
+        String result = null;
+        try {
+            result = (String) getResource(id, null, Map.class, basicUrl + "labels/{0}").get().get("name");
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Label with id {} not found", id, e);
+        }
+        return result;
     }
 
     private String getContent(String url, Integer page) {
