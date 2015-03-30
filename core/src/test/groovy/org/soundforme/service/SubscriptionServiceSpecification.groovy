@@ -16,6 +16,11 @@ class SubscriptionServiceSpecification extends Specification {
     @Inject
     def SubscriptionRepository subscriptionRepository;
 
+    def "test"() {
+
+
+    }
+
     void cleanup() {
         subscriptionRepository.deleteAll()
     }
