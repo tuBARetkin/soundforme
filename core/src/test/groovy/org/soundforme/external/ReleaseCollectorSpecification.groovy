@@ -121,6 +121,4 @@ class ReleaseCollectorSpecification extends Specification {
         assertThat(e).isInstanceOf(ReleaseCollectingException)
                 .hasMessageContaining("Error on loading first page of subscription")
     }
-
-
 }

@@ -4,6 +4,7 @@ import org.soundforme.external.model.ReleaseExternal
 import org.soundforme.config.SharedConfig
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.inject.Inject
@@ -27,23 +28,19 @@ class DiscogsStoreSpecification extends Specification {
     def DiscogsStore discogsStore;
 
     def "if id < 1 IllegalArgumentException should be thrown"() {
-        when:
-        discogsStore.getReleaseResource(0).get()
-        then:
-        def getReleaseEx = thrown(IllegalArgumentException)
-        assertThat(getReleaseEx).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
+        when: "calling method with illegal digit identifier"
+        getResourceMethod(discogsStore)
 
-        when:
-        discogsStore.getArtistReleasesPage(-1, 1).get()
-        then:
-        def getArtistEx = thrown(IllegalArgumentException)
-        assertThat(getArtistEx).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
+        then: "IllegalArgumentException expected"
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
 
-        when:
-        discogsStore.getLabelReleasesPage(0, 1).get()
-        then:
-        def getLabelEx = thrown(IllegalArgumentException)
-        assertThat(getLabelEx).isInstanceOf(IllegalArgumentException).hasMessageContaining("Release id")
+        where: "testing methods are"
+        getResourceMethod << [
+                {store -> store.getArtistReleasesPage(-1, 1).get()},
+                {store -> store.getLabelReleasesPage(0, 1).get()},
+                {store -> store.getReleaseResource(0).get()}
+        ]
     }
 
     def "if page < 1 IllegalArgumentException should be thrown"() {
@@ -113,26 +110,22 @@ class DiscogsStoreSpecification extends Specification {
     }
 
     def "if id is illegal ExecutionException should be thrown"() {
-        setup:
+        setup: "illegal identifier"
         def illegalId = 11111111
 
-        when:
-        discogsStore.getArtistReleasesPage(illegalId, 1).get()
-        then:
-        def getArtistEx = thrown(ExecutionException)
-        assertDiscogsConnectionException(getArtistEx)
+        when: "calling any method with illegal identifier"
+        getResourceMethod(illegalId, discogsStore)
 
-        when:
-        discogsStore.getLabelReleasesPage(illegalId, 1).get()
-        then:
-        def getLabelEx = thrown(ExecutionException)
-        assertDiscogsConnectionException(getLabelEx)
+        then: "exception expected"
+        def e = thrown(ExecutionException)
+        assertDiscogsConnectionException(e)
 
-        when:
-        discogsStore.getReleaseResource(illegalId).get()
-        then:
-        def getReleaseEx = thrown(ExecutionException)
-        assertDiscogsConnectionException(getReleaseEx)
+        where: "testing methods are"
+        getResourceMethod << [
+                {int id, store -> store.getArtistReleasesPage(id, 1).get()},
+                {int id, store -> store.getLabelReleasesPage(id, 1).get()},
+                {int id, store -> store.getReleaseResource(id).get()}
+        ]
     }
 
     def "if page does not exist ExecutionException excepted"() {
@@ -196,7 +189,7 @@ class DiscogsStoreSpecification extends Specification {
         assertThat(bandName).isNull()
 
         when:
-        def labelName = discogsStore.getArtistNameById(illegalResource)
+        def labelName = discogsStore.getLabelTitleById(illegalResource)
         then:
         noExceptionThrown()
         assertThat(labelName).isNull()

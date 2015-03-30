@@ -33,7 +33,7 @@ public class SubscriptionService {
 
     public Subscription follow(String stringId) {
         checkNotNull(stringId, "Id of discogs resource should be defined");
-        checkArgument(stringId.startsWith("a") || stringId.startsWith("l"), "Id should start from 'a' or 'l' character");
+        checkArgument(stringId.matches("[al][0-9]+"), "Id should match '[al][0-9]+'");
 
         SubscriptionType type = stringId.charAt(0) == 'a' ? SubscriptionType.ARTIST : SubscriptionType.LABEL;
         int id = Integer.parseInt(stringId.substring(1).trim());
