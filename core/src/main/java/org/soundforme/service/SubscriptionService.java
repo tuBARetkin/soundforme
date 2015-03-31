@@ -61,10 +61,6 @@ public class SubscriptionService {
         return result;
     }
 
-    public void refresh() {
-        throw new UnsupportedOperationException();
-    }
-
     public void unsubscribe(Subscription subscription) {
         checkNotNull(subscription, "Subscription object should be defined");
         checkArgument(isNotBlank(subscription.getId()), "Subscription id should not be empty or null");
