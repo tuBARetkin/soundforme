@@ -51,7 +51,7 @@ public class SubscriptionService {
         }
     }
 
-    public void unsubscribe(Subscription subscription){
+    public void unsubscribe(Subscription subscription) {
         checkNotNull(subscription, "Subscription object should be defined");
         checkArgument(isNotBlank(subscription.getId()), "Subscription id should not be empty or null");
 
