@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author NGorelov
@@ -27,7 +26,7 @@ public class Release {
     private List<Track> trackList;
 
     @DBRef
-    private Set<Subscription> subscriptions;
+    private List<Subscription> subscriptions;
 
     public String getId() {
         return id;
@@ -89,11 +88,11 @@ public class Release {
         this.checked = checked;
     }
 
-    public Set<Subscription> getSubscriptions() {
+    public List<Subscription> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<Subscription> subscriptions) {
+    public void setSubscriptions(List<Subscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 

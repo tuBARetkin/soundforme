@@ -60,6 +60,10 @@ public class SubscriptionService {
         subscriptionRepository.save(deletedItem);
     }
 
+    public void refresh(){
+
+    }
+
     public List<Subscription> findAll(){
         return subscriptionRepository.findAll();
     }
