@@ -1,7 +1,12 @@
 package org.soundforme.service
+
 import org.soundforme.config.SharedConfig
 import org.soundforme.external.DiscogsConnectionException
+import org.soundforme.external.ReleaseCollector
+import org.soundforme.model.Release
+import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
+import org.soundforme.repositories.ReleaseRepository
 import org.soundforme.repositories.SubscriptionRepository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -10,7 +15,6 @@ import spock.lang.Specification
 import javax.inject.Inject
 
 import static org.assertj.core.api.Assertions.assertThat
-import static org.assertj.core.api.Assertions.shouldHaveThrown
 
 /**
  * @author NGorelov
@@ -22,7 +26,11 @@ class SubscriptionServiceSpecification extends Specification {
     @Inject
     def SubscriptionRepository subscriptionRepository
     @Inject
+    def ReleaseRepository releaseRepository;
+    @Inject
     def SubscriptionService subscriptionService
+
+    def releaseCollector = Mock(ReleaseCollector);
 
     def "new subscription should contain automatic loaded title"() {
         expect:
@@ -90,6 +98,47 @@ class SubscriptionServiceSpecification extends Specification {
         assertThat(result.closed).isFalse()
         assertThat(result.type).isEqualTo(SubscriptionType.ARTIST)
         assertThat(result.title).isEqualTo("Kiss")
+    }
+
+    def "refresh should not save already existed releases but should attach new subscription"() {
+        setup: "filling database with data"
+        def subscriptionWithExistedRelease = new Subscription([
+                title: "testArtist",
+                discogsId: 100,
+                type: SubscriptionType.ARTIST,
+        ])
+        def release = new Release([
+                title: "existed",
+                discogsId: 100
+        ])
+        def subscriptionWithSameRelease = new Subscription([
+                title: "testLabel",
+                discogsId: 101,
+                type: SubscriptionType.LABEL
+        ])
+        release = releaseRepository.save(release)
+        subscriptionWithExistedRelease.releases = [release]
+        subscriptionWithExistedRelease = subscriptionRepository.save(subscriptionWithExistedRelease)
+        subscriptionWithSameRelease = subscriptionRepository.save(subscriptionWithSameRelease)
+
+        and: "mock releaseCollector invocation result"
+        subscriptionService.releaseCollector = releaseCollector
+        releaseCollector.collectAll(subscriptionWithExistedRelease) >> []
+        releaseCollector.collectAll(subscriptionWithSameRelease) >> [
+                new Release([
+                        title: "existed",
+                        discogsId: 100
+                ]
+        )]
+
+
+        when:
+        subscriptionService.refresh()
+
+        then:
+        assertThat(subscriptionRepository.findAll().get(0).releases[0].subscriptions)
+                .hasSize(2)
+                .containsOnly(subscriptionWithExistedRelease, subscriptionWithSameRelease)
     }
 
     void cleanup() {

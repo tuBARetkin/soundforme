@@ -32,7 +32,7 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
             ReleaseExternal releaseExternal = discogsStore.getReleaseResource(discogsId).get();
 
             Release result = new Release();
-            result.setAdditionDate(LocalDateTime.now());
+            result.setCollectedDate(LocalDateTime.now());
             result.setArtist(
                     releaseExternal.getArtists().stream()
                             .map(ArtistExternal::getName)
@@ -44,12 +44,18 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
                             .map(LabelExternal::getCatNo)
                             .collect(Collectors.joining(", "))
             );
+            result.setLabel(
+                    releaseExternal.getLabels().stream()
+                            .map(LabelExternal::getName)
+                            .collect(Collectors.joining(", "))
+            );
             result.setTrackList(
                     releaseExternal.getTracklist().stream()
                             .filter((track) -> !track.getTitle().isEmpty())
                             .collect(Collectors.toList())
             );
             result.setChecked(false);
+            result.setStarred(false);
             result.setReleaseDate(releaseExternal.getDate());
             result.setTitle(releaseExternal.getTitle());
 

@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author NGorelov
@@ -19,13 +18,15 @@ public class Release {
     private String artist;
     private String title;
     private String releaseDate;
-    private LocalDateTime additionDate;
+    private LocalDateTime collectedDate;
+    private String label;
     private String catNo;
     private Boolean checked;
+    private Boolean starred;
     private List<Track> trackList;
 
     @DBRef
-    private Set<Subscription> subscriptions;
+    private List<Subscription> subscriptions;
 
     public String getId() {
         return id;
@@ -63,12 +64,12 @@ public class Release {
         this.releaseDate = releaseDate;
     }
 
-    public LocalDateTime getAdditionDate() {
-        return additionDate;
+    public LocalDateTime getCollectedDate() {
+        return collectedDate;
     }
 
-    public void setAdditionDate(LocalDateTime additionDate) {
-        this.additionDate = additionDate;
+    public void setCollectedDate(LocalDateTime collectedDate) {
+        this.collectedDate = collectedDate;
     }
 
     public String getCatNo() {
@@ -87,11 +88,11 @@ public class Release {
         this.checked = checked;
     }
 
-    public Set<Subscription> getSubscriptions() {
+    public List<Subscription> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<Subscription> subscriptions) {
+    public void setSubscriptions(List<Subscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
@@ -101,5 +102,21 @@ public class Release {
 
     public void setTrackList(List<Track> trackList) {
         this.trackList = trackList;
+    }
+
+    public Boolean getStarred() {
+        return starred;
+    }
+
+    public void setStarred(Boolean starred) {
+        this.starred = starred;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

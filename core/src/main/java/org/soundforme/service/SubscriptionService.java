@@ -65,13 +65,17 @@ public class SubscriptionService {
         throw new UnsupportedOperationException();
     }
 
-    public void unsubscribe(Subscription subscription){
+    public void unsubscribe(Subscription subscription) {
         checkNotNull(subscription, "Subscription object should be defined");
         checkArgument(isNotBlank(subscription.getId()), "Subscription id should not be empty or null");
 
         Subscription deletedItem = subscriptionRepository.findOne(subscription.getId());
         deletedItem.setClosed(true);
         subscriptionRepository.save(deletedItem);
+    }
+
+    public void refresh(){
+
     }
 
     public List<Subscription> findAll(){
