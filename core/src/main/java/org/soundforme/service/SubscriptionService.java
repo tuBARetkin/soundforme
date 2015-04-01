@@ -44,9 +44,9 @@ public class SubscriptionService {
         int id = Integer.parseInt(stringId.substring(1).trim());
 
         Subscription result = subscriptionRepository.findByDiscogsIdAndType(id, type);
-        if(result == null) {
+        if (result == null) {
             String title = type == SubscriptionType.ARTIST ? discogsStore.getArtistNameById(id) : discogsStore.getLabelTitleById(id);
-            if(isNotBlank(title)) {
+            if (isNotBlank(title)) {
                 result = new Subscription();
                 result.setDiscogsId(id);
                 result.setType(type);
@@ -57,7 +57,7 @@ public class SubscriptionService {
             } else {
                 throw new DiscogsConnectionException("Resource " + stringId + " not found");
             }
-        } else if (result.getClosed()){
+        } else if (result.getClosed()) {
             result.setClosed(false);
             result = subscriptionRepository.save(result);
             logger.info("Changed 'closed' status of subscription {}/{}", id, type);
@@ -75,12 +75,12 @@ public class SubscriptionService {
         subscriptionRepository.save(deletedItem);
     }
 
-    public void refresh(){
-        for(Subscription subscription : subscriptionRepository.findAll()){
+    public void refresh() {
+        for(Subscription subscription : subscriptionRepository.findAll()) {
             Set<Release> releases = releaseCollector.collectAll(subscription);
-            for(Release release : releases){
+            for(Release release : releases) {
                 Release releaseForUpdating = releaseRepository.findByDiscogsId(release.getDiscogsId());
-                if(releaseForUpdating == null){
+                if(releaseForUpdating == null) {
                     releaseForUpdating = release;
                 }
 
@@ -92,7 +92,7 @@ public class SubscriptionService {
         }
     }
 
-    public List<Subscription> findAll(){
+    public List<Subscription> findAll() {
         return subscriptionRepository.findByClosed(false);
     }
 }

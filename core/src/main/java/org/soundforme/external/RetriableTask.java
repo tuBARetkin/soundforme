@@ -1,6 +1,6 @@
 package org.soundforme.external;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class RetriableTask<T> implements Callable<T> {
     public RetriableTask(long numberOfRetries, Integer timeToWait, Callable<T> task) {
         this.numberOfRetries = numberOfRetries;
         numberOfTriesLeft = numberOfRetries + 1;
-        this.timeToWait = (int) ObjectUtils.defaultIfNull(timeToWait, DEFAULT_WAIT_TIME);
+        this.timeToWait = ObjectUtils.defaultIfNull(timeToWait, DEFAULT_WAIT_TIME);
         this.task = task;
     }
 

@@ -1,4 +1,5 @@
 package org.soundforme.service
+
 import org.soundforme.config.SharedConfig
 import org.soundforme.external.DiscogsConnectionException
 import org.soundforme.external.ReleaseCollector
@@ -17,9 +18,12 @@ import java.time.LocalDateTime
 
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
+
 /**
  * @author NGorelov
  */
+@SuppressWarnings("GroovyAccessibility")
+
 @ContextConfiguration(classes = SharedConfig.class)
 @ActiveProfiles("test")
 class SubscriptionServiceSpecification extends Specification {
@@ -164,18 +168,18 @@ class SubscriptionServiceSpecification extends Specification {
                 .hasSize(2)
                 .containsOnly(1, 2)
     }
-    
+
     def "refresh should save collected releases to DB"(){
         setup: "filling database with subscriptions"
         def label = subscriptionRepository.save(new Subscription([
                 title: "testLabel",
                 discogsId: 100,
-                type: SubscriptionType.LABEL,
+                type: SubscriptionType.LABEL
         ]));
         def artist = subscriptionRepository.save(new Subscription([
                 title: "testArtist",
                 discogsId: 101,
-                type: SubscriptionType.ARTIST,
+                type: SubscriptionType.ARTIST
         ]));
         
         and: "mock result of collecting label release"
@@ -199,6 +203,51 @@ class SubscriptionServiceSpecification extends Specification {
                 assertThat(it.trackList).hasSize(2)
                         .extracting("title").isNotEmpty()
         }
+    }
+
+    def "if unsubscribe with null subscription NullPointerException expected"() {
+        when:
+        subscriptionService.unsubscribe(null)
+        then:
+        def e = thrown(NullPointerException)
+        assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("should be defined")
+    }
+
+    def "if unsubscribe with null or empty id IllegalArgumentException expected"() {
+        when:
+        subscriptionService.unsubscribe(new Subscription([id: id]))
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("should not be empty")
+
+        where:
+        id << [null, ""]
+    }
+
+    def "unsubscribe should only change value of closed flag"() {
+        setup:
+        def label = subscriptionRepository.save(new Subscription([
+                title: "testLabel",
+                discogsId: 100,
+                type: SubscriptionType.LABEL,
+                closed: false
+        ]))
+        def artist = subscriptionRepository.save(new Subscription([
+                title: "testArtist",
+                discogsId: 200,
+                type: SubscriptionType.ARTIST
+        ]))
+
+        when:
+        subscriptionService.unsubscribe(label)
+        then:
+        assertThat(subscriptionRepository.findOne(label.getId()).closed).isTrue()
+
+        when:
+        subscriptionService.unsubscribe(artist)
+        then:
+        assertThat(subscriptionRepository.findOne(artist.getId()).closed).isTrue()
     }
 
     def createRandomRelease(id){
