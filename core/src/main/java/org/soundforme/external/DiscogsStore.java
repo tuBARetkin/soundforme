@@ -62,7 +62,7 @@ public class DiscogsStore {
         try {
             result = (String) getResource(id, null, Map.class, basicUrl + "artists/{0}").get().get("name");
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Artist with id {} not found", id, e);
+            logger.warn("Artist with id {} not found", id, e);
         }
         return result;
     }
@@ -72,7 +72,7 @@ public class DiscogsStore {
         try {
             result = (String) getResource(id, null, Map.class, basicUrl + "labels/{0}").get().get("name");
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Label with id {} not found", id, e);
+            logger.warn("Label with id {} not found", id, e);
         }
         return result;
     }

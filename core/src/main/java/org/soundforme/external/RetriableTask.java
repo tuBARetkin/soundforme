@@ -11,7 +11,7 @@ public class RetriableTask<T> implements Callable<T> {
 
     private final Callable<T> task;
     public static final long DEFAULT_NUMBER_OF_RETRIES = 10;
-    public static final int DEFAULT_WAIT_TIME = 5000;
+    public static final int DEFAULT_WAIT_TIME = 1000;
 
     private long numberOfRetries; // total number of tries
     private long numberOfTriesLeft; // number left
