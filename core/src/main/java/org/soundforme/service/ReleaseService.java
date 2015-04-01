@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.soundforme.model.Release;
 import org.soundforme.model.Subscription;
 import org.soundforme.repositories.SubscriptionRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -18,18 +19,19 @@ import java.util.Set;
 public class ReleaseService {
     private static final Logger logger = LoggerFactory.getLogger(ReleaseService.class);
 
-    @Inject
-    private SubscriptionRepository subscriptionRepository;
-
-    public List<Release> findDistinct(Set<Subscription> subscriptions) {
+    public List<Release> loadPage(Pageable pageable) {
         throw new UnsupportedOperationException();
     }
 
-    public void save(Subscription subscription, Set<Release> releases) {
+    public Release findOne(String id) {
         throw new UnsupportedOperationException();
     }
 
-    public void markAsSeen(Release release) {
+    public void markChecked(Release release) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void markStarred(Release release) {
         throw new UnsupportedOperationException();
     }
 }
