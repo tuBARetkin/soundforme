@@ -1,5 +1,4 @@
 package org.soundforme.service
-
 import org.soundforme.config.SharedConfig
 import org.soundforme.external.DiscogsConnectionException
 import org.soundforme.external.ReleaseCollector
@@ -16,9 +15,8 @@ import spock.lang.Specification
 import javax.inject.Inject
 import java.time.LocalDateTime
 
+import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
-import static org.assertj.core.api.Assertions.tuple
-
 /**
  * @author NGorelov
  */
@@ -104,15 +102,15 @@ class SubscriptionServiceSpecification extends Specification {
     }
 
     def """refresh should not save already existed in DB releases 
-            but should attach new subscription 
-            and add release discogs id to collectedReleases of both subscriptions"""() {
+            but should add existed release ref to both subscriptions"""() {
         setup: "filling database with data"
         def subscriptionWithExistedRelease = new Subscription([
                 title: "testArtist",
                 discogsId: 100,
                 type: SubscriptionType.ARTIST,
+                collectedReleases: [100]
         ])
-        def release = new Release([title: "existed", discogsId: 100])
+        def release = createRandomRelease(100)
         def subscriptionWithSameRelease = new Subscription([
                 title: "testLabel",
                 discogsId: 101,
@@ -126,24 +124,20 @@ class SubscriptionServiceSpecification extends Specification {
         and: "mock releaseCollector invocation result"
         subscriptionService.releaseCollector = releaseCollector
         releaseCollector.collectAll(subscriptionWithExistedRelease) >> []
-        releaseCollector.collectAll(subscriptionWithSameRelease) >> [
-                new Release([
-                        title: "existed",
-                        discogsId: 100
-                ]
-        )]
+        releaseCollector.collectAll(subscriptionWithSameRelease) >> [release]
 
 
         when:
         subscriptionService.refresh()
 
         then:
-        def savedRelease = releaseRepository.findOne(release.id)
-        assertThat(savedRelease.subscriptions)
-                .hasSize(2)
-                .containsOnly(subscriptionWithExistedRelease, subscriptionWithSameRelease)
-        assertThat(subscriptionWithExistedRelease.collectedReleases).containsOnly(100)
-        assertThat(subscriptionWithSameRelease.collectedReleases).containsOnly(100)
+        def savedWithExistedRelease = subscriptionRepository.findOne(subscriptionWithExistedRelease.id)
+        def savedWithSameRelease = subscriptionRepository.findOne(subscriptionWithSameRelease.id)
+
+        assertThat(savedWithExistedRelease.collectedReleases).containsOnly(100)
+        assertThat(savedWithSameRelease.collectedReleases).containsOnly(100)
+        assertThat(savedWithExistedRelease.releases).containsOnly(release)
+        assertThat(savedWithSameRelease.releases).containsOnly(release)
     }
 
     def "refresh should add releases from collector to collectedReleases field"() {
@@ -151,18 +145,14 @@ class SubscriptionServiceSpecification extends Specification {
         def subscription = new Subscription([
                 title: "testLabel",
                 discogsId: 100,
-                type: SubscriptionType.LABEL,
+                type: SubscriptionType.LABEL
         ])
         subscription = subscriptionRepository.save(subscription)
+
+        subscriptionService.releaseCollector = releaseCollector
         releaseCollector.collectAll(subscription) >> [
-                new Release([
-                        title: "test",
-                        discogsId: 1
-                ]),
-                new Release([
-                        title: "test",
-                        discogsId: 2
-                ])
+                createRandomRelease(1),
+                createRandomRelease(2)
         ]
 
         when:
@@ -188,58 +178,15 @@ class SubscriptionServiceSpecification extends Specification {
                 type: SubscriptionType.ARTIST,
         ]));
         
-        and: "mock release collector"
+        and: "mock result of collecting label release"
         subscriptionService.releaseCollector = releaseCollector
-        def collectedDate = LocalDateTime.now()
-        releaseCollector.collectAll(label) >> [
-                new Release([
-                        discogsId: 100,
-                        artist: "testArtist1",
-                        title: "album1",
-                        releaseDate: "2015",
-                        collectedDate: collectedDate,
-                        label: "olo",
-                        catNo: "olo01",
-                        checked: false,
-                        starred: false,
-                        trackList: [
-                                new Track([title: "track1", position: "A1", duration: "5:10"]),
-                                new Track([title: "track2"])
-                        ]
-                ])
-        ]
-        releaseCollector.collectAll(artist) >> [
-                new Release([
-                        discogsId: 200,
-                        artist: "testArtist2",
-                        title: "album2",
-                        releaseDate: "2015",
-                        collectedDate: collectedDate,
-                        label: "testLabel",
-                        catNo: "test001X",
-                        checked: false,
-                        starred: false,
-                        trackList: [
-                                new Track([title: "track1", position: "A1", duration: "5:10"]),
-                                new Track([title: "track2"])
-                        ]
-                ]),
-                new Release([
-                        discogsId: 300,
-                        artist: "testArtist3",
-                        title: "album3",
-                        releaseDate: "2015",
-                        collectedDate: collectedDate,
-                        label: "testLabel",
-                        catNo: "test002X",
-                        checked: false,
-                        starred: false,
-                        trackList: [
-                                new Track([title: "track1", position: "A1", duration: "5:10"]),
-                                new Track([title: "track2"])
-                        ]
-                ])
-        ]
+        def releaseOfLabel = createRandomRelease(100)
+        releaseCollector.collectAll(label) >> [releaseOfLabel]
+
+        and: "mock result of collecting artist releases"
+        def firstArtistRelease = createRandomRelease(200)
+        def secondArtistRelease = createRandomRelease(300)
+        releaseCollector.collectAll(artist) >> [firstArtistRelease, secondArtistRelease]
 
         when:
         subscriptionService.refresh()
@@ -247,25 +194,33 @@ class SubscriptionServiceSpecification extends Specification {
         then: "all releases saved"
         def savedReleases = releaseRepository.findAll();
         assertThat(savedReleases).hasSize(3)
-                .extracting("discogsId", "artist", "title", "releaseDate", "collectedDate", "testLabel", "catNo", "checked", "starred")
-                .containsOnly(tuple(100, 200, 300),
-                        tuple("testArtist1", "testArtist2", "testArtist3"),
-                        tuple("album1", "album2", "album3"),
-                        tuple("2015"),
-                        tuple(collectedDate),
-                        tuple("olo", "testLabel"),
-                        tuple("olo01", "test001X", "test002X"),
-                        tuple(false),
-                        tuple(false)
-        );
+                .containsOnly(firstArtistRelease, secondArtistRelease, releaseOfLabel)
         savedReleases.each {
-                assertThat(it.subscriptions).hasSize(1)
                 assertThat(it.trackList).hasSize(2)
                         .extracting("title").isNotEmpty()
         }
     }
-    
+
+    def createRandomRelease(id){
+        new Release([
+                discogsId: id,
+                artist: randomUUID(),
+                title: randomUUID(),
+                releaseDate: "2015",
+                collectedDate: LocalDateTime.now(),
+                label: randomUUID(),
+                catNo: randomUUID(),
+                checked: false,
+                starred: false,
+                trackList: [
+                        new Track([title: randomUUID(), position: "A1", duration: "5:10"]),
+                        new Track([title: randomUUID()])
+                ]
+        ])
+    }
+
     void cleanup() {
         subscriptionRepository.deleteAll()
+        releaseRepository.deleteAll()
     }
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author NGorelov
@@ -47,7 +47,7 @@ public class ReleaseCollector {
         ForkJoinPool forkJoinPool = new ForkJoinPool(8);
         return forkJoinPool.invoke(new CollectReleasesTask(
                 firstPage,
-                subscription.getCollectedReleases() == null ? newArrayList() : subscription.getCollectedReleases(),
+                subscription.getCollectedReleases() == null ? newHashSet() : subscription.getCollectedReleases(),
                 discogsStore,
                 subscription.getType(),
                 subscription.getDiscogsId())

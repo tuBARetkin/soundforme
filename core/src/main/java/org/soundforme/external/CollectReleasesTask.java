@@ -20,13 +20,13 @@ public class CollectReleasesTask extends RecursiveTask<Set<Release>> {
     private static final Logger logger = LoggerFactory.getLogger(CollectReleasesTask.class);
 
     private final ReleasesPage releasesPage;
-    private final List<Integer> ignoredReleases;
+    private final Set<Integer> ignoredReleases;
     private final DiscogsStore discogsStore;
     private final SubscriptionType subscriptionType;
     private final int discogsId;
 
     public CollectReleasesTask(ReleasesPage releasesPage,
-                               List<Integer> ignoredReleases,
+                               Set<Integer> ignoredReleases,
                                DiscogsStore discogsStore,
                                SubscriptionType subscriptionType,
                                int discogsId) {

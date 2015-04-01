@@ -1,7 +1,6 @@
 package org.soundforme.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -24,9 +23,6 @@ public class Release {
     private Boolean checked;
     private Boolean starred;
     private List<Track> trackList;
-
-    @DBRef
-    private List<Subscription> subscriptions;
 
     public String getId() {
         return id;
@@ -88,14 +84,6 @@ public class Release {
         this.checked = checked;
     }
 
-    public List<Subscription> getSubscriptions() {
-        return subscriptions;
-    }
-
-    public void setSubscriptions(List<Subscription> subscriptions) {
-        this.subscriptions = subscriptions;
-    }
-
     public List<Track> getTrackList() {
         return trackList;
     }
@@ -120,23 +108,41 @@ public class Release {
         this.label = label;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Release)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Release release = (Release) o;
 
-        return discogsId.equals(release.discogsId)
-                && title.equals(release.title)
-                && trackList.equals(release.trackList);
+        if (!artist.equals(release.artist)) return false;
+        if (catNo != null ? !catNo.equals(release.catNo) : release.catNo != null) return false;
+        if (checked != null ? !checked.equals(release.checked) : release.checked != null) return false;
+        if (!collectedDate.equals(release.collectedDate)) return false;
+        if (!discogsId.equals(release.discogsId)) return false;
+        if (id != null ? !id.equals(release.id) : release.id != null) return false;
+        if (label != null ? !label.equals(release.label) : release.label != null) return false;
+        if (releaseDate != null ? !releaseDate.equals(release.releaseDate) : release.releaseDate != null) return false;
+        if (starred != null ? !starred.equals(release.starred) : release.starred != null) return false;
+        if (!title.equals(release.title)) return false;
+        if (trackList != null ? !trackList.equals(release.trackList) : release.trackList != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = discogsId.hashCode();
+        result = 31 * result + artist.hashCode();
         result = 31 * result + title.hashCode();
-        result = 31 * result + trackList.hashCode();
+        result = 31 * result + (releaseDate != null ? releaseDate.hashCode() : 0);
+        result = 31 * result + collectedDate.hashCode();
+        result = 31 * result + (label != null ? label.hashCode() : 0);
+        result = 31 * result + (catNo != null ? catNo.hashCode() : 0);
+        result = 31 * result + (checked != null ? checked.hashCode() : 0);
+        result = 31 * result + (starred != null ? starred.hashCode() : 0);
+        result = 31 * result + (trackList != null ? trackList.hashCode() : 0);
         return result;
     }
 }

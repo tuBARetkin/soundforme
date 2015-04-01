@@ -4,6 +4,7 @@ import org.soundforme.config.SharedConfig
 import org.soundforme.model.Release
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.tuple
  * @author NGorelov
  */
 @ContextConfiguration(classes = SharedConfig.class)
+@ActiveProfiles("test")
 class ReleaseCollectorSpecification extends Specification {
     @Inject
     def ReleaseCollector releaseCollector;

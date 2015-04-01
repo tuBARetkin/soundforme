@@ -4,8 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
 import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author NGorelov
@@ -18,7 +19,7 @@ public class Subscription {
     private String title;
     private SubscriptionType type;
     private Integer discogsId;
-    private List<Integer> collectedReleases;
+    private Set<Integer> collectedReleases;
     private Boolean closed;
 
     @DBRef
@@ -60,12 +61,30 @@ public class Subscription {
         this.releases = releases;
     }
 
-    public List<Integer> getCollectedReleases() {
+    public void addRelease(Release release){
+        if(release != null){
+            if(releases == null){
+                releases = newHashSet();
+            }
+            releases.add(release);
+        }
+    }
+
+    public Set<Integer> getCollectedReleases() {
         return collectedReleases;
     }
 
-    public void setCollectedReleases(List<Integer> collectedReleases) {
+    public void setCollectedReleases(Set<Integer> collectedReleases) {
         this.collectedReleases = collectedReleases;
+    }
+
+    public void addCollectedRelease(int id){
+        if(id > 0){
+            if(collectedReleases == null){
+                collectedReleases = newHashSet();
+            }
+            collectedReleases.add(id);
+        }
     }
 
     public Boolean getClosed() {
@@ -74,5 +93,31 @@ public class Subscription {
 
     public void setClosed(Boolean closed) {
         this.closed = closed;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Subscription that = (Subscription) o;
+
+        if (closed != null ? !closed.equals(that.closed) : that.closed != null) return false;
+        if (!discogsId.equals(that.discogsId)) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (!title.equals(that.title)) return false;
+        if (type != that.type) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = title.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + discogsId.hashCode();
+        result = 31 * result + (closed != null ? closed.hashCode() : 0);
+        return result;
     }
 }

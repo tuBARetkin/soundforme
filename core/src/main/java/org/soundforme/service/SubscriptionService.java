@@ -5,13 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.soundforme.external.DiscogsConnectionException;
 import org.soundforme.external.DiscogsStore;
 import org.soundforme.external.ReleaseCollector;
+import org.soundforme.model.Release;
 import org.soundforme.model.Subscription;
 import org.soundforme.model.SubscriptionType;
+import org.soundforme.repositories.ReleaseRepository;
 import org.soundforme.repositories.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -26,6 +29,8 @@ public class SubscriptionService {
 
     @Inject
     private ReleaseCollector releaseCollector;
+    @Inject
+    private ReleaseRepository releaseRepository;
     @Inject
     private DiscogsStore discogsStore;
     @Inject
@@ -71,7 +76,20 @@ public class SubscriptionService {
     }
 
     public void refresh(){
+        for(Subscription subscription : subscriptionRepository.findAll()){
+            Set<Release> releases = releaseCollector.collectAll(subscription);
+            for(Release release : releases){
+                Release releaseForUpdating = releaseRepository.findByDiscogsId(release.getDiscogsId());
+                if(releaseForUpdating == null){
+                    releaseForUpdating = release;
+                }
 
+                releaseForUpdating = releaseRepository.save(releaseForUpdating);
+                subscription.addCollectedRelease(releaseForUpdating.getDiscogsId());
+                subscription.addRelease(releaseForUpdating);
+                subscriptionRepository.save(subscription);
+            }
+        }
     }
 
     public List<Subscription> findAll(){
