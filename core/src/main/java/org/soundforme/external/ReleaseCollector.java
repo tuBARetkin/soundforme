@@ -31,9 +31,9 @@ public class ReleaseCollector {
         checkNotNull(subscription, "subscription should be defined");
         checkArgument(subscription.getType() != null, "type of subscription should be defined");
         checkArgument(subscription.getDiscogsId() != null, "subscription id from discogs should be defined");
+        logger.info("Collecting releases of subscription {}/{} started", subscription.getDiscogsId(), subscription.getType());
 
         ReleasesPage firstPage;
-
         try {
             if (subscription.getType() == SubscriptionType.ARTIST) {
                 firstPage = discogsStore.getArtistReleasesPage(subscription.getDiscogsId(), 1).get();

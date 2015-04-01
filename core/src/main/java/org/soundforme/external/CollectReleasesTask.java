@@ -43,6 +43,7 @@ public class CollectReleasesTask extends RecursiveTask<Set<Release>> {
     protected Set<Release> compute() {
         int currentPage = releasesPage.getPagination().getPage();
         int totalPages = releasesPage.getPagination().getPages();
+        logger.debug("Start loading {} page of resource {}/{}", currentPage, discogsId, subscriptionType);
 
         CollectReleasesTask releasesFromNextPage = null;
         if (currentPage < totalPages) {

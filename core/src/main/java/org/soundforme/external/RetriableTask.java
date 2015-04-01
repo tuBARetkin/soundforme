@@ -17,16 +17,9 @@ public class RetriableTask<T> implements Callable<T> {
     private long numberOfTriesLeft; // number left
     private int timeToWait; // wait interval
 
-
     public RetriableTask(Callable<T> task) {
         this(DEFAULT_NUMBER_OF_RETRIES, null, task);
     }
-
-
-    public RetriableTask(long numberOfRetries, Callable<T> task) {
-        this(numberOfRetries, null, task);
-    }
-
 
     public RetriableTask(long numberOfRetries, Integer timeToWait, Callable<T> task) {
         this.numberOfRetries = numberOfRetries;

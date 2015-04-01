@@ -29,7 +29,9 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
     @Override
     protected Release compute() {
         try {
+            logger.debug("Start loading release {} from discogs", discogsId);
             ReleaseExternal releaseExternal = discogsStore.getReleaseResource(discogsId).get();
+            logger.debug("Release {} collected from discogs", discogsId);
 
             Release result = new Release();
             result.setCollectedDate(LocalDateTime.now());
