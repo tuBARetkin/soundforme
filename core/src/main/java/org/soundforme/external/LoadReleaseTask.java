@@ -41,7 +41,7 @@ public class LoadReleaseTask extends RecursiveTask<Release> {
             result.setDiscogsId(discogsId);
             result.setCatNo(
                     releaseExternal.getLabels().stream()
-                            .map(LabelExternal::getCatNo)
+                            .map((extLabel) -> extLabel.getCatNo().toUpperCase().trim().replace(" ", ""))
                             .collect(Collectors.joining(", "))
             );
             result.setLabel(

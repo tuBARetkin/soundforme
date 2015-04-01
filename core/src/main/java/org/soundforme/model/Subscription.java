@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,7 +18,7 @@ public class Subscription {
     private String title;
     private SubscriptionType type;
     private Integer discogsId;
-    private Set<Integer> collectedReleases;
+    private List<Integer> collectedReleases;
     private Boolean closed;
 
     @DBRef
@@ -59,11 +60,11 @@ public class Subscription {
         this.releases = releases;
     }
 
-    public Set<Integer> getCollectedReleases() {
+    public List<Integer> getCollectedReleases() {
         return collectedReleases;
     }
 
-    public void setCollectedReleases(Set<Integer> collectedReleases) {
+    public void setCollectedReleases(List<Integer> collectedReleases) {
         this.collectedReleases = collectedReleases;
     }
 

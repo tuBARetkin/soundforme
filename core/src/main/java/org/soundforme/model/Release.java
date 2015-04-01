@@ -119,4 +119,24 @@ public class Release {
     public void setLabel(String label) {
         this.label = label;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Release)) return false;
+
+        Release release = (Release) o;
+
+        return discogsId.equals(release.discogsId)
+                && title.equals(release.title)
+                && trackList.equals(release.trackList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = discogsId.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + trackList.hashCode();
+        return result;
+    }
 }

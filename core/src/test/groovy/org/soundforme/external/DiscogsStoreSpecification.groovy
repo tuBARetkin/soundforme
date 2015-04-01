@@ -1,10 +1,9 @@
 package org.soundforme.external
 
-import org.soundforme.external.model.ReleaseExternal
 import org.soundforme.config.SharedConfig
+import org.soundforme.external.model.ReleaseExternal
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.inject.Inject

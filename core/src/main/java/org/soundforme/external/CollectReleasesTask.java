@@ -1,14 +1,9 @@
 package org.soundforme.external;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.soundforme.external.model.ReleaseExternal;
-import org.soundforme.external.model.ReleaseLink;
 import org.soundforme.external.model.ReleasesPage;
 import org.soundforme.model.Release;
-import org.soundforme.model.Subscription;
 import org.soundforme.model.SubscriptionType;
 
 import java.util.List;
@@ -18,9 +13,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
-
 /**
  * @author NGorelov
  */
@@ -28,13 +20,13 @@ public class CollectReleasesTask extends RecursiveTask<Set<Release>> {
     private static final Logger logger = LoggerFactory.getLogger(CollectReleasesTask.class);
 
     private final ReleasesPage releasesPage;
-    private final Set<Integer> ignoredReleases;
+    private final List<Integer> ignoredReleases;
     private final DiscogsStore discogsStore;
     private final SubscriptionType subscriptionType;
     private final int discogsId;
 
     public CollectReleasesTask(ReleasesPage releasesPage,
-                               Set<Integer> ignoredReleases,
+                               List<Integer> ignoredReleases,
                                DiscogsStore discogsStore,
                                SubscriptionType subscriptionType,
                                int discogsId) {
