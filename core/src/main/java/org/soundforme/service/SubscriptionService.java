@@ -18,6 +18,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -73,9 +74,11 @@ public class SubscriptionService {
         Subscription deletedItem = subscriptionRepository.findOne(subscription.getId());
         deletedItem.setClosed(true);
         subscriptionRepository.save(deletedItem);
+        logger.info("Subscription {} {} closed", subscription.getDiscogsId(), subscription.getTitle());
     }
 
     public void refresh() {
+        logger.info("Checking updates on discogs.com");
         for(Subscription subscription : subscriptionRepository.findAll()) {
             Set<Release> releases = releaseCollector.collectAll(subscription);
             for(Release release : releases) {
@@ -83,7 +86,7 @@ public class SubscriptionService {
                 if(releaseForUpdating == null) {
                     releaseForUpdating = release;
                 }
-
+                logger.debug("Updating release discogsId: {}, mongoId: {}", release.getDiscogsId(), release.getId());
                 releaseForUpdating = releaseRepository.save(releaseForUpdating);
                 subscription.addCollectedRelease(releaseForUpdating.getDiscogsId());
                 subscription.addRelease(releaseForUpdating);
@@ -93,6 +96,6 @@ public class SubscriptionService {
     }
 
     public List<Subscription> findAll() {
-        return subscriptionRepository.findByClosed(false);
+        return subscriptionRepository.findByClosedIn(newHashSet(false, null));
     }
 }

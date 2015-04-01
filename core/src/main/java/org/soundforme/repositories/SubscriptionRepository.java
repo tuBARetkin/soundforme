@@ -4,6 +4,7 @@ import org.soundforme.model.Subscription;
 import org.soundforme.model.SubscriptionType;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -11,5 +12,5 @@ import java.util.List;
  */
 public interface SubscriptionRepository extends MongoRepository<Subscription, String> {
     Subscription findByDiscogsIdAndType(int discogsId, SubscriptionType type);
-    List<Subscription> findByClosed(boolean closed);
+    List<Subscription> findByClosedIn(Collection<Boolean> closed);
 }

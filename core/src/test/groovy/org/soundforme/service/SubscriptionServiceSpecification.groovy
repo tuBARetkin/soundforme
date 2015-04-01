@@ -107,22 +107,16 @@ class SubscriptionServiceSpecification extends Specification {
 
     def """refresh should not save already existed in DB releases 
             but should add existed release ref to both subscriptions"""() {
-        setup: "filling database with data"
-        def subscriptionWithExistedRelease = new Subscription([
-                title: "testArtist",
-                discogsId: 100,
-                type: SubscriptionType.ARTIST,
-                collectedReleases: [100]
-        ])
+        setup: "filling database with subscription with one release collected"
+        def subscriptionWithExistedRelease = createRandomSubscription(false, 100, null)
+        subscriptionWithExistedRelease.collectedReleases = [100]
         def release = createRandomRelease(100)
-        def subscriptionWithSameRelease = new Subscription([
-                title: "testLabel",
-                discogsId: 101,
-                type: SubscriptionType.LABEL
-        ])
         release = releaseRepository.save(release)
         subscriptionWithExistedRelease.releases = [release]
         subscriptionWithExistedRelease = subscriptionRepository.save(subscriptionWithExistedRelease)
+
+        and: "filling database with new empty subscription"
+        def subscriptionWithSameRelease = createRandomSubscription(true, 101, null)
         subscriptionWithSameRelease = subscriptionRepository.save(subscriptionWithSameRelease)
 
         and: "mock releaseCollector invocation result"
@@ -130,14 +124,12 @@ class SubscriptionServiceSpecification extends Specification {
         releaseCollector.collectAll(subscriptionWithExistedRelease) >> []
         releaseCollector.collectAll(subscriptionWithSameRelease) >> [release]
 
-
         when:
         subscriptionService.refresh()
 
         then:
         def savedWithExistedRelease = subscriptionRepository.findOne(subscriptionWithExistedRelease.id)
         def savedWithSameRelease = subscriptionRepository.findOne(subscriptionWithSameRelease.id)
-
         assertThat(savedWithExistedRelease.collectedReleases).containsOnly(100)
         assertThat(savedWithSameRelease.collectedReleases).containsOnly(100)
         assertThat(savedWithExistedRelease.releases).containsOnly(release)
@@ -146,13 +138,9 @@ class SubscriptionServiceSpecification extends Specification {
 
     def "refresh should add releases from collector to collectedReleases field"() {
         setup:
-        def subscription = new Subscription([
-                title: "testLabel",
-                discogsId: 100,
-                type: SubscriptionType.LABEL
-        ])
-        subscription = subscriptionRepository.save(subscription)
+        def subscription = subscriptionRepository.save(createRandomSubscription(true, 100, null))
 
+        and: "mock result of releaseCollector"
         subscriptionService.releaseCollector = releaseCollector
         releaseCollector.collectAll(subscription) >> [
                 createRandomRelease(1),
@@ -171,16 +159,8 @@ class SubscriptionServiceSpecification extends Specification {
 
     def "refresh should save collected releases to DB"(){
         setup: "filling database with subscriptions"
-        def label = subscriptionRepository.save(new Subscription([
-                title: "testLabel",
-                discogsId: 100,
-                type: SubscriptionType.LABEL
-        ]));
-        def artist = subscriptionRepository.save(new Subscription([
-                title: "testArtist",
-                discogsId: 101,
-                type: SubscriptionType.ARTIST
-        ]));
+        def label = subscriptionRepository.save(createRandomSubscription(true, 100, null))
+        def artist = subscriptionRepository.save(createRandomSubscription(false, 101, null))
         
         and: "mock result of collecting label release"
         subscriptionService.releaseCollector = releaseCollector
@@ -227,27 +207,33 @@ class SubscriptionServiceSpecification extends Specification {
 
     def "unsubscribe should only change value of closed flag"() {
         setup:
-        def label = subscriptionRepository.save(new Subscription([
-                title: "testLabel",
-                discogsId: 100,
-                type: SubscriptionType.LABEL,
-                closed: false
-        ]))
-        def artist = subscriptionRepository.save(new Subscription([
-                title: "testArtist",
-                discogsId: 200,
-                type: SubscriptionType.ARTIST
-        ]))
+        def label = subscriptionRepository.save(createRandomSubscription(true, 100, false))
+        def artist = subscriptionRepository.save(createRandomSubscription(false, 200, null))
 
-        when:
+        when: "unsubscribe with not null 'closed' flag"
         subscriptionService.unsubscribe(label)
         then:
         assertThat(subscriptionRepository.findOne(label.getId()).closed).isTrue()
 
-        when:
+        when: "unsubscribe with null 'closed'"
         subscriptionService.unsubscribe(artist)
         then:
         assertThat(subscriptionRepository.findOne(artist.getId()).closed).isTrue()
+    }
+
+    def "findAll should return not closed subscriptions"() {
+        setup:
+        subscriptionRepository.save(createRandomSubscription(true, 100, false))
+        subscriptionRepository.save(createRandomSubscription(true, 200, true))
+        subscriptionRepository.save(createRandomSubscription(false, 300, null))
+
+        when:
+        def result = subscriptionService.findAll()
+
+        then:
+        assertThat(result).hasSize(2)
+                .extracting("discogsId")
+                .containsOnly(100, 300)
     }
 
     def createRandomRelease(id){
@@ -265,6 +251,15 @@ class SubscriptionServiceSpecification extends Specification {
                         new Track([title: randomUUID(), position: "A1", duration: "5:10"]),
                         new Track([title: randomUUID()])
                 ]
+        ])
+    }
+
+    def createRandomSubscription(labelNeeded, discogsId, closed){
+        new Subscription([
+                title: randomUUID(),
+                discogsId: discogsId,
+                type: labelNeeded ? SubscriptionType.LABEL : SubscriptionType.ARTIST,
+                closed: closed
         ])
     }
 
