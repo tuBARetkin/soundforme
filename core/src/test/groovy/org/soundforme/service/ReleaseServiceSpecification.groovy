@@ -114,7 +114,7 @@ class ReleaseServiceSpecification extends Specification{
         assertThat(releaseRepository.count()).isEqualTo(1)
     }
 
-    def "findPage should return page of expected size"() {
+    def "findPage should return page of expected size and data"() {
         setup:
         def releases = []
         100.times {
@@ -133,13 +133,87 @@ class ReleaseServiceSpecification extends Specification{
         }
     }
 
-    @Ignore
-    def "findStarred page should return page of expected size and only with starred=true"() {
+    def "findPage should return all pages"() {
+        setup:
+        def releases = []
+        75.times {
+            releases << releaseRepository.save(createRandomRelease(it + 1))
+        }
+
+        when:
+        def firstPage = releaseService.loadPage(new PageRequest(0, 50, Sort.Direction.DESC, "collectedDate"))
+        def lastPage = releaseService.loadPage(new PageRequest(1, 50, Sort.Direction.DESC, "collectedDate"))
+
+        then:
+        assertThat(firstPage.totalElements).isEqualTo(75)
+        assertThat(firstPage.totalPages).isEqualTo(2)
+        assertThat(firstPage.content).hasSize(50)
+        assertThat(lastPage.totalElements).isEqualTo(75)
+        assertThat(lastPage.totalPages).isEqualTo(2)
+        assertThat(lastPage.content).hasSize(25)
+    }
+
+    def "findStarredPage should return only pages with starred setted to true"() {
+        setup: "filling db with 100 releases half of which marked starred"
+        def releases = []
+        100.times {
+            def release = createRandomRelease(it + 1)
+            if((it + 1) % 2 == 0){
+                release.starred = true
+            }
+            releases << releaseRepository.save(release)
+        }
+
+        when:
+        def firstPage = releaseService.loadStarredPage(new PageRequest(0, 50, Sort.Direction.DESC, "collectedDate"))
+
+        then:
+        assertThat(firstPage.totalElements).isEqualTo(50)
+        assertThat(firstPage.totalPages).isEqualTo(1)
+        assertThat(firstPage.content).hasSize(50)
+    }
+
+    def "findStarredPage should return page of expected size and data"() {
         setup:
         def releases = []
         100.times {
-            releases << releaseRepository.save(createRandomRelease(it + 1))
+            def release = createRandomRelease(it + 1)
+            release.starred = true
+            releases << releaseRepository.save(release)
         }
+
+        when:
+        def firstPage = releaseService.loadStarredPage(new PageRequest(0, 50, Sort.Direction.DESC, "collectedDate"))
+
+        then:
+        assertThat(firstPage.totalElements).isEqualTo(100)
+        assertThat(firstPage.totalPages).isEqualTo(2)
+        assertThat(firstPage.content).hasSize(50)
+        firstPage.content.eachWithIndex { item, i ->
+            assertThat(item).isEqualToComparingFieldByField(releases[releases.size - i - 1] as Release)
+        }
+    }
+
+    def "findStarredPage should return all pages"() {
+        setup:
+        def releases = []
+        75.times {
+            def release = createRandomRelease(it + 1)
+            release.starred = true
+            releases << releaseRepository.save(release)
+        }
+
+        when:
+        def firstPage = releaseService.loadStarredPage(new PageRequest(0, 50, Sort.Direction.DESC, "collectedDate"))
+        def lastPage = releaseService.loadStarredPage(new PageRequest(1, 50, Sort.Direction.DESC, "collectedDate"))
+
+        then:
+        assertThat(firstPage.totalElements).isEqualTo(75)
+        assertThat(firstPage.totalPages).isEqualTo(2)
+        assertThat(firstPage.content).hasSize(50)
+        assertThat(lastPage.totalElements).isEqualTo(75)
+        assertThat(lastPage.totalPages).isEqualTo(2)
+        assertThat(lastPage.content).hasSize(25)
     }
 
     void cleanup() {
