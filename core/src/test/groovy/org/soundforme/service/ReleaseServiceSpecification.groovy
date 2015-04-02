@@ -3,8 +3,11 @@ package org.soundforme.service
 import org.soundforme.config.SharedConfig
 import org.soundforme.model.Release
 import org.soundforme.repositories.ReleaseRepository
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import javax.inject.Inject
@@ -36,7 +39,7 @@ class ReleaseServiceSpecification extends Specification{
         where:
         testMethod << [
                 {releaseService -> releaseService.findOne(null)},
-                {releaseService -> releaseService.markChecked(null)},
+                {releaseService -> releaseService.markChecked(null, true)},
                 {releaseService -> releaseService.markStarred(null, true)},
                 {releaseService -> releaseService.loadPage(null)},
                 {releaseService -> releaseService.loadStarredPage(null)}
@@ -48,7 +51,27 @@ class ReleaseServiceSpecification extends Specification{
         releaseService.findOne("")
         then:
         def e = thrown(IllegalArgumentException)
-        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("should not be empty")
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("should not be blank")
+    }
+
+    def "findOne should return existed release"() {
+        setup: "filling db with release object"
+        def release = releaseRepository.save(createRandomRelease(100))
+
+        when:
+        def result = releaseService.findOne(release.id)
+
+        then:
+        assertThat(result).isEqualToComparingFieldByField(release)
+    }
+
+    def "findOne should return null if release not found"() {
+        when:
+        def result = releaseService.findOne("wrong id")
+
+        then:
+        noExceptionThrown()
+        assertThat(result).isNull()
     }
 
     def "starring or checking release methods should work with objects with not blank id"() {
@@ -89,6 +112,34 @@ class ReleaseServiceSpecification extends Specification{
         releaseService.markChecked(new Release([id: "wrong_id"]), true)
         then:
         assertThat(releaseRepository.count()).isEqualTo(1)
+    }
+
+    def "findPage should return page of expected size"() {
+        setup:
+        def releases = []
+        100.times {
+            releases << releaseRepository.save(createRandomRelease(it + 1))
+        }
+
+        when:
+        def firstPage = releaseService.loadPage(new PageRequest(0, 50, Sort.Direction.DESC, "collectedDate"))
+
+        then:
+        assertThat(firstPage.totalElements).isEqualTo(100)
+        assertThat(firstPage.totalPages).isEqualTo(2)
+        assertThat(firstPage.content).hasSize(50)
+        firstPage.content.eachWithIndex { item, i ->
+            assertThat(item).isEqualToComparingFieldByField(releases[releases.size - i - 1] as Release)
+        }
+    }
+
+    @Ignore
+    def "findStarred page should return page of expected size and only with starred=true"() {
+        setup:
+        def releases = []
+        100.times {
+            releases << releaseRepository.save(createRandomRelease(it + 1))
+        }
     }
 
     void cleanup() {
