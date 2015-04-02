@@ -18,6 +18,8 @@ import java.time.LocalDateTime
 
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
+import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
+import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
 
 /**
  * @author NGorelov
@@ -234,33 +236,6 @@ class SubscriptionServiceSpecification extends Specification {
         assertThat(result).hasSize(2)
                 .extracting("discogsId")
                 .containsOnly(100, 300)
-    }
-
-    def createRandomRelease(id){
-        new Release([
-                discogsId: id,
-                artist: randomUUID(),
-                title: randomUUID(),
-                releaseDate: "2015",
-                collectedDate: LocalDateTime.now(),
-                label: randomUUID(),
-                catNo: randomUUID(),
-                checked: false,
-                starred: false,
-                trackList: [
-                        new Track([title: randomUUID(), position: "A1", duration: "5:10"]),
-                        new Track([title: randomUUID()])
-                ]
-        ])
-    }
-
-    def createRandomSubscription(labelNeeded, discogsId, closed){
-        new Subscription([
-                title: randomUUID(),
-                discogsId: discogsId,
-                type: labelNeeded ? SubscriptionType.LABEL : SubscriptionType.ARTIST,
-                closed: closed
-        ])
     }
 
     void cleanup() {
