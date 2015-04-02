@@ -103,6 +103,18 @@ class SubscriptionServiceSpecification extends Specification {
         assertThat(result.title).isEqualTo("Kiss")
     }
 
+    def "if follow already existed but closed subscription mark it closed=false only"() {
+        setup:
+        def subscription = subscriptionRepository.save(createRandomSubscription(true, 100, true))
+
+        when:
+        subscriptionService.follow("l100")
+
+        then:
+        def result = subscriptionRepository.findOne(subscription.id)
+        assertThat(result.closed).isFalse()
+    }
+
     def """refresh should not save already existed in DB releases 
             but should add existed release ref to both subscriptions"""() {
         setup: "filling database with subscription with one release collected"
