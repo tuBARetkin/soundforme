@@ -3,10 +3,8 @@ package org.soundforme.service
 import org.soundforme.config.SharedConfig
 import org.soundforme.external.DiscogsConnectionException
 import org.soundforme.external.ReleaseCollector
-import org.soundforme.model.Release
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
-import org.soundforme.model.Track
 import org.soundforme.repositories.ReleaseRepository
 import org.soundforme.repositories.SubscriptionRepository
 import org.springframework.test.context.ActiveProfiles
@@ -14,9 +12,7 @@ import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 import javax.inject.Inject
-import java.time.LocalDateTime
 
-import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
 import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
 import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
