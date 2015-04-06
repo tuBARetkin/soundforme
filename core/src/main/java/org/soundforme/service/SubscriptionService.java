@@ -56,7 +56,7 @@ public class SubscriptionService {
                 result = subscriptionRepository.save(result);
                 logger.info("New subscription {}/{} saved to db", id, type);
             } else {
-                throw new DiscogsConnectionException("Resource " + stringId + " not found");
+                logger.warn("Resource title {} not found in discogs", stringId);
             }
         } else if (result.getClosed()) {
             result.setClosed(false);
