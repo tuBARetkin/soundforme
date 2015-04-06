@@ -66,7 +66,7 @@ class SubscriptionControllerSpecification extends Specification {
 
         then:
         1 * subscriptionService.follow("a100") >> null
-        response.andExpect(status().is4xxClientError())
+        response.andExpect(status().isBadRequest())
                 .andExpect(content().string("Subscription a100 not found"))
     }
 
@@ -78,7 +78,7 @@ class SubscriptionControllerSpecification extends Specification {
 
         then:
         1 * subscriptionService.follow("a100") >> {throw new RuntimeException()}
-        response.andExpect(status().is4xxClientError())
+        response.andExpect(status().isBadRequest())
                 .andExpect(content().string("Error on loading subscription a100"))
     }
 }

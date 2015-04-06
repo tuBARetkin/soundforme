@@ -1,5 +1,6 @@
 package org.soundforme.controller;
 
+import com.google.common.net.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class SubscriptionController {
             } else {
                 result = new ResponseEntity<>("Subscription " + discogsStringId + " not found", HttpStatus.BAD_REQUEST);
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.warn("Error on loading subscription {}", discogsStringId, e);
             result = new ResponseEntity<>("Error on loading subscription " + discogsStringId, HttpStatus.BAD_REQUEST);
         }
