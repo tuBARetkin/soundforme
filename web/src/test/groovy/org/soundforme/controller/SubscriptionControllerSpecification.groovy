@@ -3,24 +3,19 @@ package org.soundforme.controller
 import org.soundforme.config.SharedConfig
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
-import org.soundforme.service.EntityObjectsBuilder
-import org.soundforme.service.ReleaseService
 import org.soundforme.service.SubscriptionService
 import org.springframework.boot.test.WebIntegrationTest
-import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MockMvcBuilder
-import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import spock.lang.Specification
 
 import javax.inject.Inject
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 /**
  * @author NGorelov
@@ -51,14 +46,19 @@ class SubscriptionControllerSpecification extends Specification {
         )
 
         then:
-        1 * subscriptionService.follow("a100") >> new Subscription([type: SubscriptionType.ARTIST, discogsId: 100])
+        1 * subscriptionService.follow("a100") >> new Subscription([
+                type: SubscriptionType.ARTIST,
+                discogsId: 100,
+                title: "testArtist"
+        ])
         response.andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath('$.type', is("ARTIST")))
-                .andExpect(jsonPath('$.discogsId', is(100)))
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("type").value("ARTIST"))
+                .andExpect(jsonPath("discogsId").value(100))
+                .andExpect(jsonPath("title").value("testArtist"))
     }
 
-    def "controller should return new subscription with 400 code if label or artist not found"() {
+    def "controller should return 400 code if label or artist not found"() {
         when:
         def response = mockMvc.perform(post("/subscriptions")
                 .param("discogsStringId", "a100")
@@ -67,8 +67,18 @@ class SubscriptionControllerSpecification extends Specification {
         then:
         1 * subscriptionService.follow("a100") >> null
         response.andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath('$.message', is("Resource not found")))
+                .andExpect(content().string("Subscription a100 not found"))
     }
 
+    def "controller should return 400 code if connection problems"() {
+        when:
+        def response = mockMvc.perform(post("/subscriptions")
+                .param("discogsStringId", "a100")
+        )
+
+        then:
+        1 * subscriptionService.follow("a100") >> {throw new RuntimeException()}
+        response.andExpect(status().is4xxClientError())
+                .andExpect(content().string("Error on loading subscription a100"))
+    }
 }

@@ -44,6 +44,7 @@ subprojects {
         testCompile 'org.spockframework:spock-spring:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1' //for spock mocking
         testCompile 'com.jayway.jsonpath:json-path:2.0.0'
+        testCompile 'org.springframework:spring-test:4.1.6.RELEASE'
 
     }
 
