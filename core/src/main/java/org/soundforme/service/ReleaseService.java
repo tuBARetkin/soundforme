@@ -38,19 +38,18 @@ public class ReleaseService {
         return releaseRepository.findOne(id);
     }
 
-    public void markChecked(Release release, boolean checked) {
-        setFlagAndSave(release, (Release existed) -> existed.setChecked(checked));
+    public void setChecked(String id, boolean checked) {
+        setFlagAndSave(id, (Release existed) -> existed.setChecked(checked));
     }
 
-    public void markStarred(Release release, boolean starred) {
-        setFlagAndSave(release, (Release existed) -> existed.setStarred(starred));
+    public void setStarred(String id, boolean starred) {
+        setFlagAndSave(id, (Release existed) -> existed.setStarred(starred));
     }
 
-    private void setFlagAndSave(Release release, Consumer<Release> flagSetter){
-        checkNotNull(release, "Release object should be defined");
-        checkArgument(isNotBlank(release.getId()), "Release id should not be blank");
+    private void setFlagAndSave(String id, Consumer<Release> flagSetter){
+        checkArgument(isNotBlank(id), "Release id should not be blank");
 
-        Release existedRelease = releaseRepository.findOne(release.getId());
+        Release existedRelease = releaseRepository.findOne(id);
         if(existedRelease != null){
             flagSetter.accept(existedRelease);
             releaseRepository.save(existedRelease);

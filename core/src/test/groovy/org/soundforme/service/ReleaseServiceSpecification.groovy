@@ -38,8 +38,6 @@ class ReleaseServiceSpecification extends Specification{
         where:
         testMethod << [
                 {releaseService -> releaseService.findOne(null)},
-                {releaseService -> releaseService.markChecked(null, true)},
-                {releaseService -> releaseService.markStarred(null, true)},
                 {releaseService -> releaseService.loadPage(null)},
                 {releaseService -> releaseService.loadStarredPage(null)}
         ]
@@ -73,7 +71,7 @@ class ReleaseServiceSpecification extends Specification{
         assertThat(result).isNull()
     }
 
-    def "starring or checking release methods should work with objects with not blank id"() {
+    def "starring or checking release methods should work only with not blank ids"() {
         when:
         testMethod(releaseService)
 
@@ -83,32 +81,44 @@ class ReleaseServiceSpecification extends Specification{
 
         where:
         testMethod << [
-                {releaseService -> releaseService.markChecked(new Release(), true)},
-                {releaseService -> releaseService.markStarred(new Release(), true)},
+                {releaseService -> releaseService.setChecked(null, true)},
+                {releaseService -> releaseService.setChecked("", true)},
+                {releaseService -> releaseService.setStarred(null, true)},
+                {releaseService -> releaseService.setStarred("", true)},
         ]
     }
 
-    def "markStarred or markChecked should set true to existed release and do nothing if release not found in db"() {
+    def "markStarred or markChecked should set values to existed release and do nothing if release not found in db"() {
         setup: "filling db with release object"
         def release = releaseRepository.save(createRandomRelease(100))
 
         when: "starred existing release"
-        releaseService.markStarred(new Release([id: release.id]), true)
+        releaseService.setStarred(release.id, true)
         then:
         assertThat(releaseRepository.findOne(release.id).starred).isTrue()
 
+        when: "starred = false existing release"
+        releaseService.setStarred(release.id, false)
+        then:
+        assertThat(releaseRepository.findOne(release.id).starred).isFalse()
+
         when: "checked existing release"
-        releaseService.markChecked(new Release([id: release.id]), true)
+        releaseService.setChecked(release.id, true)
         then:
         assertThat(releaseRepository.findOne(release.id).checked).isTrue()
 
+        when: "checked = false existing release"
+        releaseService.setChecked(release.id, false)
+        then:
+        assertThat(releaseRepository.findOne(release.id).checked).isFalse()
+
         when: "starred release not found"
-        releaseService.markStarred(new Release([id: "wrong_id"]), true)
+        releaseService.setStarred("wrong_id", true)
         then:
         assertThat(releaseRepository.count()).isEqualTo(1)
 
         when: "checked release not found"
-        releaseService.markChecked(new Release([id: "wrong_id"]), true)
+        releaseService.setChecked("wrong_id", true)
         then:
         assertThat(releaseRepository.count()).isEqualTo(1)
     }
