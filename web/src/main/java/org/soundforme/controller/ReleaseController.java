@@ -26,13 +26,8 @@ public class ReleaseController {
         throw new UnsupportedOperationException();
     }
 
-    @RequestMapping(value = "/releases/{id}", method = RequestMethod.GET)
-    public Release findOne(@PathVariable("id") String id) {
-        throw new UnsupportedOperationException();
-    }
-
     @RequestMapping(value = "/releases/{id}", method = RequestMethod.PUT)
-    public void update(@RequestBody Release release, @PathVariable("id") String id) {
+    public void markStarredOrChecked(@RequestBody Release release, @PathVariable("id") String id) {
         throw new UnsupportedOperationException();
     }
 }

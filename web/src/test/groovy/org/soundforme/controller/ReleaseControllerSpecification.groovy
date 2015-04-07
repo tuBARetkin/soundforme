@@ -1,16 +1,83 @@
 package org.soundforme.controller
 
+import com.google.gson.Gson
+import org.soundforme.config.SharedConfig
+import org.soundforme.model.Release
+import org.soundforme.repositories.ReleaseRepository
 import org.soundforme.service.ReleaseService
+import org.springframework.boot.test.WebIntegrationTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 import spock.lang.Specification
+
+import javax.inject.Inject
+
+import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import static org.assertj.core.api.Assertions.assertThat
 
 /**
  * @author NGorelov
  */
-class ReleaseControllerSpecification extends Specification {
-    def releaseService = Mock(ReleaseService)
-    def releaseController = new ReleaseController(releaseService: releaseService)
-    def mockMvc = MockMvcBuilders.standaloneSetup(releaseController).build()
+@SuppressWarnings(value = ["GroovyAssignabilityCheck", "GroovyAccessibility"])
 
+@ContextConfiguration(classes = SharedConfig.class)
+@ActiveProfiles("test")
+@WebIntegrationTest
+class ReleaseControllerSpecification extends Specification {
+    @Inject
+    def WebApplicationContext webApplicationContext;
+    @Inject
+    def ReleaseController releaseController
+    @Inject
+    def ReleaseRepository releaseRepository
+
+    def MockMvc mockMvc
+    def releaseService = Mock(ReleaseService)
+
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+    }
+
+    def "update should not change fields except starred and checked"() {
+        setup:
+        def releases = [
+                releaseRepository.save(createRandomRelease(100)),
+                releaseRepository.save(createRandomRelease(200)),
+                releaseRepository.save(createRandomRelease(300))
+        ]
+
+        when:
+        def response = mockMvc.perform(put("/releases/{id}", id)
+                .content(new Gson().toJson(new Release([
+                discogsId: anotherDisogsId,
+                starred: starred,
+                checked: checked,
+                releaseDate: anotherReleaseDate
+            ])))
+        )
+
+
+        then:
+        response.andExpect(status().isOk())
+        def result = releaseRepository.findByDiscogsId(id)
+        assertThat(result).isEqualToIgnoringGivenFields("starred", "checked")
+        if(starred){
+            assertThat(result.starred).isTrue()
+        }
+        if(checked){
+            assertThat(result.checked).isTrue()
+        }
+
+        where:
+        id      | anotherDisogsId   | starred   | checked   | anotherReleaseDate
+        "100"   | 100               | true      | false     | "9999"
+        "200"   | 999               | false     | true      | "2015"
+        "300"   | 999               | true      | true      | "9999"
+    }
 
 }

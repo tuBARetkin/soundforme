@@ -7,7 +7,6 @@ import org.soundforme.model.SubscriptionType
 import org.soundforme.repositories.ReleaseRepository
 import org.soundforme.repositories.SubscriptionRepository
 import org.soundforme.service.SubscriptionService
-import org.spockframework.util.Matchers
 import org.springframework.boot.test.WebIntegrationTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -21,10 +20,9 @@ import javax.inject.Inject
 import static org.hamcrest.Matchers.hasSize
 import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
 import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
-import static org.assertj.core.api.Assertions.assertThat
 
 /**
  * @author NGorelov
