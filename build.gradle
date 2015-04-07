@@ -9,9 +9,7 @@ buildscript {
 
 allprojects {
     group = 'org.soundforme'
-}
 
-subprojects {
     apply plugin: "java"
     apply plugin: "groovy"
 
@@ -19,6 +17,21 @@ subprojects {
         mavenCentral()
     }
 
+    task testJar(type: Jar, dependsOn: "testClasses") {
+        baseName = "test-${project.name}"
+        from sourceSets.test.output
+    }
+
+    configurations {
+        tests
+    }
+
+    artifacts {
+        tests testJar
+    }
+}
+
+subprojects {
     dependencies {
         //spring
         compile 'org.springframework:spring-context:4.1.5.RELEASE'
@@ -53,5 +66,4 @@ subprojects {
         testLogging.showStandardStreams = true
     }
 }
-
 

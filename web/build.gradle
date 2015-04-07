@@ -1,5 +1,7 @@
 apply plugin: 'spring-boot'
 dependencies {
     compile project(':core')
+
+    testCompile project(path: ':core', configuration: 'tests')
     testCompile 'org.hamcrest:hamcrest-all:1.3'
 }
