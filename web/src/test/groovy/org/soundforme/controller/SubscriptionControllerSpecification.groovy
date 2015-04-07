@@ -1,6 +1,7 @@
 package org.soundforme.controller
 
 import org.soundforme.config.SharedConfig
+import org.soundforme.external.DiscogsConnectionException
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
 import org.soundforme.service.SubscriptionService
@@ -67,18 +68,19 @@ class SubscriptionControllerSpecification extends Specification {
         then:
         1 * subscriptionService.follow("a100") >> null
         response.andExpect(status().isBadRequest())
-                .andExpect(content().string("Subscription a100 not found"))
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("message").value("Subscription a100 not found"))
     }
 
-    def "controller should return 400 code if connection problems"() {
+    def "controller should return 400 code if connection to discogs problems"() {
         when:
         def response = mockMvc.perform(post("/subscriptions")
                 .param("discogsStringId", "a100")
         )
 
         then:
-        1 * subscriptionService.follow("a100") >> {throw new RuntimeException()}
+        1 * subscriptionService.follow("a100") >> {throw new DiscogsConnectionException()}
         response.andExpect(status().isBadRequest())
-                .andExpect(content().string("Error on loading subscription a100"))
+                .andExpect(status().reason("Error on connection to discogs"))
     }
 }

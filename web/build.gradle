@@ -1,5 +1,4 @@
 apply plugin: 'spring-boot'
 dependencies {
     compile project(':core')
-    compile 'org.springframework.boot:spring-boot-starter-web:1.2.2.RELEASE'
 }
