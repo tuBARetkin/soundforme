@@ -41,12 +41,12 @@ public class SubscriptionController {
 
         Subscription subscription = subscriptionRepository.findOne(id);
         if(subscription != null) {
-            logger.debug("Subscription {} found. Preparing OK response");
+            logger.debug("Subscription {} found. Preparing OK response", id);
             if (subscription.getReleases() != null) {
                 releases.addAll(subscription.getReleases());
             }
         } else {
-            logger.debug("Subscription {} not found. Preparing NOT_FOUND response");
+            logger.debug("Subscription {} not found. Preparing NOT_FOUND response", id);
             Map<String, Object> errorObject = ImmutableMap.of("message", "Subscription " + id + " not found");
             result = new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
         }
@@ -60,10 +60,10 @@ public class SubscriptionController {
 
         Subscription subscription = subscriptionService.follow(discogsStringId);
         if(subscription != null) {
-            logger.debug("Subscription {} found. Preparing CREATED response");
+            logger.debug("Subscription {} found. Preparing CREATED response", discogsStringId);
             result = new ResponseEntity<>(subscription, HttpStatus.CREATED);
         } else {
-            logger.debug("Subscription {} not found in discogs database. Preparing BAD_REQUEST response");
+            logger.debug("Subscription {} not found in discogs database. Preparing BAD_REQUEST response", discogsStringId);
             Map<String, Object> errorObject = ImmutableMap.of("message", "Subscription " + discogsStringId + " not found");
             result = new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
         }
