@@ -15,10 +15,10 @@ import spock.lang.Specification
 
 import javax.inject.Inject
 
-import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import static org.assertj.core.api.Assertions.assertThat
+import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 /**
  * @author NGorelov
@@ -84,9 +84,9 @@ class ReleaseControllerSpecification extends Specification {
         when:
         def response = mockMvc.perform(put("/releases/{id}", id)
                 .content(new Gson().toJson(new Release([
-                starred: starred,
-                checked: checked
-        ])))
+                        starred: starred,
+                        checked: checked
+                ])))
         )
 
         then:

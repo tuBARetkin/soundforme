@@ -70,4 +70,9 @@ public class SubscriptionController {
 
         return result;
     }
+
+    @RequestMapping(value = "/subscriptions/{id}", method = RequestMethod.DELETE)
+    public void unsubscribe(@PathVariable("id") String id) {
+        throw new UnsupportedOperationException();
+    }
 }

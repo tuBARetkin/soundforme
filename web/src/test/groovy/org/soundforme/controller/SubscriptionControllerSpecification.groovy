@@ -152,11 +152,9 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return all not closed subscriptions"() {
         setup:
-        def subscriptions = [
-                subscriptionRepository.save(createRandomSubscription(true, 500, false)),
-                subscriptionRepository.save(createRandomSubscription(false, 501, false)),
-                subscriptionRepository.save(createRandomSubscription(true, 502, true))
-        ]
+        subscriptionRepository.save(createRandomSubscription(true, 500, false))
+        subscriptionRepository.save(createRandomSubscription(false, 501, false))
+        subscriptionRepository.save(createRandomSubscription(true, 502, true))
 
         when:
         def response = mockMvc.perform(get("/subscriptions") )

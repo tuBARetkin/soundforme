@@ -53,6 +53,8 @@ public class ReleaseService {
         if(existedRelease != null){
             flagSetter.accept(existedRelease);
             releaseRepository.save(existedRelease);
+        } else {
+            throw new EntityNotFoundException("Release with id " + id + " not found in db");
         }
     }
 }

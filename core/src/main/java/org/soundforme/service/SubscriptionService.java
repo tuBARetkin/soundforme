@@ -56,7 +56,7 @@ public class SubscriptionService {
                 result = subscriptionRepository.save(result);
                 logger.info("New subscription {}/{} saved to db", id, type);
             } else {
-                logger.warn("Resource title {} not found in discogs", stringId);
+                throw new DiscogsConnectionException("Resource " + stringId + " not found");
             }
         } else if (result.getClosed()) {
             result.setClosed(false);
@@ -67,14 +67,17 @@ public class SubscriptionService {
         return result;
     }
 
-    public void unsubscribe(Subscription subscription) {
-        checkNotNull(subscription, "Subscription object should be defined");
-        checkArgument(isNotBlank(subscription.getId()), "Subscription id should not be empty or null");
+    public void unsubscribe(String id) {
+        checkArgument(isNotBlank(id), "Subscription id should not be empty or null");
 
-        Subscription deletedItem = subscriptionRepository.findOne(subscription.getId());
-        deletedItem.setClosed(true);
-        subscriptionRepository.save(deletedItem);
-        logger.info("Subscription {} {} closed", subscription.getDiscogsId(), subscription.getTitle());
+        Subscription deletedItem = subscriptionRepository.findOne(id);
+        if(deletedItem != null) {
+            deletedItem.setClosed(true);
+            subscriptionRepository.save(deletedItem);
+            logger.info("Subscription {} {} closed", deletedItem.getDiscogsId(), deletedItem.getTitle());
+        } else {
+            throw new EntityNotFoundException("Subscription with id " + id + " not found in db");
+        }
     }
 
     public void refresh() {

@@ -7,6 +7,7 @@ import org.soundforme.service.ReleaseService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -28,6 +29,5 @@ public class ReleaseController {
 
     @RequestMapping(value = "/releases/{id}", method = RequestMethod.PUT)
     public void markStarredOrChecked(@RequestBody Release release, @PathVariable("id") String id) {
-        throw new UnsupportedOperationException();
     }
 }

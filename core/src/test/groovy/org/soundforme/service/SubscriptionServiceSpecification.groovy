@@ -195,22 +195,12 @@ class SubscriptionServiceSpecification extends Specification {
         }
     }
 
-    def "if unsubscribe with null subscription NullPointerException expected"() {
+    def "unsubscribe should work only with not blank id"() {
         when:
-        subscriptionService.unsubscribe(null)
-        then:
-        def e = thrown(NullPointerException)
-        assertThat(e).isInstanceOf(NullPointerException).hasMessageContaining("should be defined")
-    }
-
-    def "if unsubscribe with null or empty id IllegalArgumentException expected"() {
-        when:
-        subscriptionService.unsubscribe(new Subscription([id: id]))
-
+        subscriptionService.unsubscribe(id)
         then:
         def e = thrown(IllegalArgumentException)
-        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("should not be empty")
-
+        assertThat(e).isInstanceOf(IllegalArgumentException).hasMessageContaining("Subscription id should not be empty or null")
         where:
         id << [null, ""]
     }
@@ -221,14 +211,23 @@ class SubscriptionServiceSpecification extends Specification {
         def artist = subscriptionRepository.save(createRandomSubscription(false, 200, null))
 
         when: "unsubscribe with not null 'closed' flag"
-        subscriptionService.unsubscribe(label)
+        subscriptionService.unsubscribe(label.id)
         then:
         assertThat(subscriptionRepository.findOne(label.getId()).closed).isTrue()
 
         when: "unsubscribe with null 'closed'"
-        subscriptionService.unsubscribe(artist)
+        subscriptionService.unsubscribe(artist.id)
         then:
         assertThat(subscriptionRepository.findOne(artist.getId()).closed).isTrue()
+    }
+
+    def "unsubscribe should throw EntityNotFoundException if no subscription in db"() {
+        when:
+        subscriptionService.unsubscribe("test")
+
+        then:
+        def e = thrown(EntityNotFoundException)
+        assertThat(e).isInstanceOf(EntityNotFoundException).hasMessageContaining("not found in db")
     }
 
     def "findAll should return not closed subscriptions"() {
