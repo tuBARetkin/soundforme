@@ -4,7 +4,10 @@ import org.soundforme.config.SharedConfig
 import org.soundforme.external.DiscogsConnectionException
 import org.soundforme.model.Subscription
 import org.soundforme.model.SubscriptionType
+import org.soundforme.repositories.ReleaseRepository
+import org.soundforme.repositories.SubscriptionRepository
 import org.soundforme.service.SubscriptionService
+import org.spockframework.util.Matchers
 import org.springframework.boot.test.WebIntegrationTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -15,8 +18,13 @@ import spock.lang.Specification
 
 import javax.inject.Inject
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import static org.hamcrest.Matchers.hasSize
+import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
+import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import static org.assertj.core.api.Assertions.assertThat
 
 /**
  * @author NGorelov
@@ -31,6 +39,10 @@ class SubscriptionControllerSpecification extends Specification {
     def WebApplicationContext webApplicationContext;
     @Inject
     def SubscriptionController subscriptionController
+    @Inject
+    def SubscriptionRepository subscriptionRepository
+    @Inject
+    def ReleaseRepository releaseRepository;
 
     def MockMvc mockMvc
     def subscriptionService = Mock(SubscriptionService)
@@ -82,5 +94,59 @@ class SubscriptionControllerSpecification extends Specification {
         1 * subscriptionService.follow("a100") >> {throw new DiscogsConnectionException()}
         response.andExpect(status().isBadRequest())
                 .andExpect(status().reason("Error on connection to discogs"))
+    }
+
+    def "controller should return releases of passed subscription"() {
+        setup:
+        def releases = [
+                releaseRepository.save(createRandomRelease(100)),
+                releaseRepository.save(createRandomRelease(200)),
+                releaseRepository.save(createRandomRelease(300))
+        ]
+        def subscription = createRandomSubscription(true, 500, false)
+        subscription.releases = releases[0..1]
+        subscription = subscriptionRepository.save(subscription)
+
+        when:
+        def response = mockMvc.perform(get("/subscriptions/{id}/releases", subscription.id))
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(2)))
+                .andExpect(jsonPath('$[0].discogsId').value(100))
+                .andExpect(jsonPath('$[1].discogsId').value(200))
+
+    }
+
+    def "controller should return empty array as result of getting releases of empty subscription"() {
+        setup:
+        def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false));
+
+        when:
+        def response = mockMvc.perform(get("/subscriptions/{id}/releases", subscription.id))
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(0)))
+    }
+
+    def "controller should return NOT_FOUND error if subscription not found"() {
+        when:
+        def response = mockMvc.perform(get("/subscriptions/1/releases")
+        )
+
+        then:
+        response.andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("message").value("Subscription 1 not found"))
+    }
+
+    void cleanup() {
+        subscriptionRepository.deleteAll()
+        releaseRepository.deleteAll()
     }
 }

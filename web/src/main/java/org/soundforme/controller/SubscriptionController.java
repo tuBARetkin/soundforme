@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.soundforme.external.DiscogsConnectionException;
 import org.soundforme.model.Release;
 import org.soundforme.model.Subscription;
+import org.soundforme.repositories.SubscriptionRepository;
 import org.soundforme.service.SubscriptionService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -29,6 +31,8 @@ public class SubscriptionController {
 
     @Inject
     private SubscriptionService subscriptionService;
+    @Inject
+    private SubscriptionRepository subscriptionRepository;
 
     @RequestMapping(value = "/subscriptions", method = RequestMethod.GET)
     public List<Subscription> findAll() {
@@ -36,8 +40,21 @@ public class SubscriptionController {
     }
 
     @RequestMapping(value = "/subscriptions/{id}/releases", method = RequestMethod.GET)
-    public List<Release> findReleases(@PathVariable("id") String id) {
-        throw new UnsupportedOperationException();
+    public ResponseEntity<?> findReleases(@PathVariable("id") String id) {
+        List<Release> releases = newArrayList();
+        ResponseEntity<?> result = new ResponseEntity<>(releases, HttpStatus.OK);
+
+        Subscription subscription = subscriptionRepository.findOne(id);
+        if(subscription != null) {
+            if (subscription.getReleases() != null) {
+                releases.addAll(subscription.getReleases());
+            }
+        } else {
+            Map<String, Object> errorObject = ImmutableMap.of("message", "Subscription " + id + " not found");
+            result = new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
+        }
+
+        return result;
     }
 
     @RequestMapping(value = "/subscriptions", method = RequestMethod.POST)
