@@ -48,11 +48,13 @@ class SubscriptionControllerSpecification extends Specification {
     def subscriptionService = Mock(SubscriptionService)
 
     void setup() {
-        subscriptionController.subscriptionService = subscriptionService
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
     }
 
     def "controller should return new subscription with 201 code if label or artist exists in discogs or in db"() {
+        setup:
+        subscriptionController.subscriptionService = subscriptionService
+
         when:
         def response = mockMvc.perform(post("/subscriptions")
                 .param("discogsStringId", "a100")
@@ -72,6 +74,9 @@ class SubscriptionControllerSpecification extends Specification {
     }
 
     def "controller should return 400 code if label or artist not found"() {
+        setup:
+        subscriptionController.subscriptionService = subscriptionService
+
         when:
         def response = mockMvc.perform(post("/subscriptions")
                 .param("discogsStringId", "a100")
@@ -85,6 +90,9 @@ class SubscriptionControllerSpecification extends Specification {
     }
 
     def "controller should return 400 code if connection to discogs problems"() {
+        setup:
+        subscriptionController.subscriptionService = subscriptionService
+
         when:
         def response = mockMvc.perform(post("/subscriptions")
                 .param("discogsStringId", "a100")
@@ -122,7 +130,7 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return empty array as result of getting releases of empty subscription"() {
         setup:
-        def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false));
+        def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false))
 
         when:
         def response = mockMvc.perform(get("/subscriptions/{id}/releases", subscription.id))
@@ -136,13 +144,47 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return NOT_FOUND error if subscription not found"() {
         when:
-        def response = mockMvc.perform(get("/subscriptions/1/releases")
-        )
+        def response = mockMvc.perform(get("/subscriptions/1/releases"))
 
         then:
         response.andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("message").value("Subscription 1 not found"))
+    }
+
+    def "controller should return all not closed subscriptions"() {
+        setup:
+        def subscriptions = [
+                subscriptionRepository.save(createRandomSubscription(true, 500, false)),
+                subscriptionRepository.save(createRandomSubscription(false, 501, false)),
+                subscriptionRepository.save(createRandomSubscription(true, 502, true))
+        ]
+
+        when:
+        def response = mockMvc.perform(get("/subscriptions") )
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(2)))
+                .andExpect(jsonPath('$[0].discogsId').value(500))
+                .andExpect(jsonPath('$[0].closed').value(false))
+                .andExpect(jsonPath('$[0].type').value("LABEL"))
+                .andExpect(jsonPath('$[1].discogsId').value(501))
+                .andExpect(jsonPath('$[1].closed').value(false))
+                .andExpect(jsonPath('$[1].type').value("ARTIST"))
+    }
+
+    def "controller should return all empty list if no subscriptions"() {
+        when:
+        def response = mockMvc.perform(get("/subscriptions") )
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(0)))
     }
 
     void cleanup() {

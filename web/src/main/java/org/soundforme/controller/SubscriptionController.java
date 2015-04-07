@@ -31,7 +31,7 @@ public class SubscriptionController {
 
     @RequestMapping(value = "/subscriptions", method = RequestMethod.GET)
     public List<Subscription> findAll() {
-        throw new UnsupportedOperationException();
+        return subscriptionService.findAll();
     }
 
     @RequestMapping(value = "/subscriptions/{id}/releases", method = RequestMethod.GET)
