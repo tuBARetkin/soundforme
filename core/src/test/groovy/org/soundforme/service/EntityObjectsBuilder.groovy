@@ -13,7 +13,12 @@ import static java.util.UUID.randomUUID
  * @author NGorelov
 */
 class EntityObjectsBuilder {
+
     static def createRandomRelease(id){
+        createRandomRelease(id, false, false)
+    }
+
+    static def createRandomRelease(id, starred, checked){
         new Release([
                 discogsId: id,
                 artist: randomUUID(),
@@ -22,8 +27,8 @@ class EntityObjectsBuilder {
                 collectedDate: LocalDateTime.now(),
                 label: randomUUID(),
                 catNo: randomUUID(),
-                checked: false,
-                starred: false,
+                checked: checked,
+                starred: starred,
                 trackList: [
                         new Track([title: randomUUID(), position: "A1", duration: "5:10"]),
                         new Track([title: randomUUID()])

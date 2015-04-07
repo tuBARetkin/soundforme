@@ -61,17 +61,11 @@ class ReleaseControllerSpecification extends Specification {
             ])))
         )
 
-
         then:
         response.andExpect(status().isOk())
         def result = releaseRepository.findByDiscogsId(id)
-        assertThat(result).isEqualToIgnoringGivenFields("starred", "checked")
-        if(starred){
-            assertThat(result.starred).isTrue()
-        }
-        if(checked){
-            assertThat(result.checked).isTrue()
-        }
+        assertThat(result).isEqualToIgnoringGivenFields(releases.find {it.id == result.id}, "starred", "checked")
+        assertThat(result).isNotEqualTo(releases.find {it.id == result.id})
 
         where:
         id      | anotherDisogsId   | starred   | checked   | anotherReleaseDate
@@ -80,4 +74,32 @@ class ReleaseControllerSpecification extends Specification {
         "300"   | 999               | true      | true      | "9999"
     }
 
+    def "update should change both of starred and checked fields in one request"() {
+        setup:
+        releaseRepository.save(createRandomRelease(100))
+        releaseRepository.save(createRandomRelease(200))
+        releaseRepository.save(createRandomRelease(300))
+        releaseRepository.save(createRandomRelease(400, true, true))
+
+        when:
+        def response = mockMvc.perform(put("/releases/{id}", id)
+                .content(new Gson().toJson(new Release([
+                starred: starred,
+                checked: checked
+        ])))
+        )
+
+        then:
+        response.andExpect(status().isOk())
+        def result = releaseRepository.findByDiscogsId(id)
+        assertThat(result.starred).isEqualTo(starred)
+        assertThat(result.checked).isEqualTo(checked)
+
+        where:
+        id      | starred   | checked
+        "100"   | true      | false
+        "200"   | false     | true
+        "300"   | true      | true
+        "400"   | false     | false
+    }
 }
