@@ -14,11 +14,11 @@ import static java.util.UUID.randomUUID
 */
 class EntityObjectsBuilder {
 
-    static def createRandomRelease(id){
+    static def createRandomRelease(id) {
         createRandomRelease(id, false, false)
     }
 
-    static def createRandomRelease(id, starred, checked){
+    static def createRandomRelease(id, starred, checked) {
         new Release([
                 discogsId: id,
                 artist: randomUUID(),
@@ -36,7 +36,7 @@ class EntityObjectsBuilder {
         ])
     }
 
-    static def createRandomSubscription(labelNeeded, discogsId, closed){
+    static def createRandomSubscription(labelNeeded, discogsId, closed) {
         new Subscription([
                 title: randomUUID(),
                 discogsId: discogsId,
