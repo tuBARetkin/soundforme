@@ -17,6 +17,7 @@ import spock.lang.Specification
 
 import javax.inject.Inject
 
+import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.hasSize
 import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
 import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
@@ -175,7 +176,7 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return all empty list if no subscriptions"() {
         when:
-        def response = mockMvc.perform(get("/subscriptions") )
+        def response = mockMvc.perform(get("/subscriptions"))
 
         then:
         response.andExpect(status().isOk())
@@ -186,11 +187,23 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "unsubscribe should not work with not existed entities, NOT_FOUND status expected"() {
         when:
-        def response = mockMvc.perform(delete("/subscriptions/wrongID") )
+        def response = mockMvc.perform(delete("/subscriptions/wrongID"))
 
         then:
         response.andExpect(status().isNotFound())
                 .andExpect(status().reason("Entity does not exist in database"))
+    }
+
+    def "unsubscribe should change status of subscription to closed"() {
+        setup:
+        def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false))
+
+        when:
+        def response = mockMvc.perform(delete("/subscriptions/{id}", subscription.id))
+
+        then:
+        response.andExpect(status().isOk())
+        assertThat(subscriptionRepository.findOne(subscription.id).closed).isTrue()
     }
     
     void cleanup() {
