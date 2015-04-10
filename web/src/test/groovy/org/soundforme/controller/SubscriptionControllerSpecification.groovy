@@ -20,6 +20,7 @@ import javax.inject.Inject
 import static org.hamcrest.Matchers.hasSize
 import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
 import static org.soundforme.service.EntityObjectsBuilder.createRandomSubscription
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -183,6 +184,15 @@ class SubscriptionControllerSpecification extends Specification {
                 .andExpect(jsonPath('$').value(hasSize(0)))
     }
 
+    def "unsubscribe should not work with not existed entities, NOT_FOUND status expected"() {
+        when:
+        def response = mockMvc.perform(delete("/subscriptions/wrongID") )
+
+        then:
+        response.andExpect(status().isNotFound())
+                .andExpect(status().reason("Entity does not exist in database"))
+    }
+    
     void cleanup() {
         subscriptionRepository.deleteAll()
         releaseRepository.deleteAll()
