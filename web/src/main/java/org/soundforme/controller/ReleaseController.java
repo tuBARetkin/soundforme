@@ -29,5 +29,11 @@ public class ReleaseController {
 
     @RequestMapping(value = "/releases/{id}", method = RequestMethod.PUT)
     public void markStarredOrChecked(@RequestBody Release release, @PathVariable("id") String id) {
+        if(release.getChecked() != null) {
+            releaseService.setChecked(id, release.getChecked());
+        }
+        if(release.getStarred() != null) {
+            releaseService.setStarred(id, release.getStarred());
+        }
     }
 }
