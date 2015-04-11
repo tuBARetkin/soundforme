@@ -17,7 +17,11 @@ import javax.inject.Inject
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.soundforme.service.EntityObjectsBuilder.createRandomRelease
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import static org.hamcrest.Matchers.hasSize
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 /**
@@ -101,5 +105,21 @@ class ReleaseControllerSpecification extends Specification {
         "200"   | false     | true
         "300"   | true      | true
         "400"   | false     | false
+    }
+
+    def "findAll should return all releases if pageable object is null"() {
+        setup:
+        100.times({
+            releaseRepository.save(createRandomRelease(it))
+        })
+
+        when:
+        def response = mockMvc.perform(get("/releases"))
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(100)))
     }
 }
