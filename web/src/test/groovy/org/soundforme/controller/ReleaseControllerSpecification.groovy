@@ -6,6 +6,8 @@ import org.soundforme.model.Release
 import org.soundforme.repositories.ReleaseRepository
 import org.soundforme.service.ReleaseService
 import org.springframework.boot.test.WebIntegrationTest
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -121,5 +123,26 @@ class ReleaseControllerSpecification extends Specification {
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath('$').isArray())
                 .andExpect(jsonPath('$').value(hasSize(100)))
+    }
+
+    def "findAll should return expected page of releases"() {
+        setup:
+        100.times({
+            releaseRepository.save(createRandomRelease(it))
+        })
+
+        when:
+        def response = mockMvc.perform(get("/releases")
+                .content(new Gson().toJson(new PageRequest([
+                    page: 1,
+                    size: 50
+                ])))
+        )
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath('$').isArray())
+                .andExpect(jsonPath('$').value(hasSize(50)))
     }
 }
