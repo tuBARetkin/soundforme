@@ -12,6 +12,7 @@ import org.soundforme.repositories.ReleaseRepository;
 import org.soundforme.repositories.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Set;
