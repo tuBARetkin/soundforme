@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soundforme.model.Release;
 import org.soundforme.service.ReleaseService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +25,8 @@ public class ReleaseController {
     private ReleaseService releaseService;
 
     @RequestMapping(value = "/releases", method = RequestMethod.GET)
-    public List<Release> findAll(@RequestBody(required = false) Pageable pageable) {
-        throw new UnsupportedOperationException();
+    public Page<Release> findAll(@RequestParam("page") int page, @RequestParam("size") int size) {
+        return releaseService.loadPage(new PageRequest(page, size));
     }
 
     @RequestMapping(value = "/releases/{id}", method = RequestMethod.PUT)

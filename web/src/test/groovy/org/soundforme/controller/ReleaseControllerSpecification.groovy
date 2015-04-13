@@ -109,40 +109,30 @@ class ReleaseControllerSpecification extends Specification {
         "400"   | false     | false
     }
 
-    def "findAll should return all releases if pageable object is null"() {
-        setup:
-        100.times({
-            releaseRepository.save(createRandomRelease(it))
-        })
-
-        when:
-        def response = mockMvc.perform(get("/releases"))
-
-        then:
-        response.andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath('$').isArray())
-                .andExpect(jsonPath('$').value(hasSize(100)))
-    }
-
     def "findAll should return expected page of releases"() {
         setup:
-        100.times({
+        99.times({
             releaseRepository.save(createRandomRelease(it))
         })
 
         when:
         def response = mockMvc.perform(get("/releases")
-                .content(new Gson().toJson(new PageRequest([
-                    page: 1,
-                    size: 50
-                ])))
+                .param("page", page as String)
+                .param("size", 50 as String)
         )
 
         then:
         response.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath('$').isArray())
-                .andExpect(jsonPath('$').value(hasSize(50)))
+                .andExpect(jsonPath('$.content').isArray())
+                .andExpect(jsonPath('$.content').value(hasSize(expectedSize)))
+
+        where:
+        page << [0, 1]
+        expectedSize << [50 ,49]
+    }
+
+    void cleanup() {
+        releaseRepository.deleteAll()
     }
 }
