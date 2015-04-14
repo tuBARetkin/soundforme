@@ -111,16 +111,20 @@ class ReleaseServiceSpecification extends Specification{
         releaseService.setChecked(release.id, false)
         then:
         assertThat(releaseRepository.findOne(release.id).checked).isFalse()
+    }
 
+    def "markStarred and markChecked should not work with not existed releases. EntityNotFoundException expected"() {
         when: "starred release not found"
         releaseService.setStarred("wrong_id", true)
         then:
-        assertThat(releaseRepository.count()).isEqualTo(1)
+        def e = thrown(EntityNotFoundException)
+        assertThat(e).isInstanceOf(EntityNotFoundException).hasMessage("Release with id wrong_id not found in db")
 
         when: "checked release not found"
         releaseService.setChecked("wrong_id", true)
         then:
-        assertThat(releaseRepository.count()).isEqualTo(1)
+        def e2 = thrown(EntityNotFoundException)
+        assertThat(e2).isInstanceOf(EntityNotFoundException).hasMessage("Release with id wrong_id not found in db")
     }
 
     def "findPage should return page of expected size and data"() {

@@ -16,8 +16,6 @@ import javax.inject.Inject;
  */
 @Configurable(autowire = Autowire.BY_TYPE)
 public class RefreshJob extends QuartzJobBean {
-    private static final Logger logger = LoggerFactory.getLogger(RefreshJob.class);
-
     @Inject
     private SubscriptionService subscriptionService;
 
@@ -25,5 +23,4 @@ public class RefreshJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         subscriptionService.refresh();
     }
-
 }
