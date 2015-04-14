@@ -132,6 +132,7 @@ class ReleaseServiceSpecification extends Specification{
         def releases = []
         100.times {
             releases << releaseRepository.save(createRandomRelease(it + 1))
+            Thread.sleep(100)
         }
 
         when:
@@ -193,6 +194,7 @@ class ReleaseServiceSpecification extends Specification{
             def release = createRandomRelease(it + 1)
             release.starred = true
             releases << releaseRepository.save(release)
+            Thread.sleep(100)
         }
 
         when:
