@@ -40,14 +40,11 @@ class ReleaseControllerSpecification extends Specification {
     def WebApplicationContext webApplicationContext;
 
     @Inject
-    def ReleaseController releaseController
-    @Inject
     def ReleaseRepository releaseRepository
 
-    @Shared
     def MockMvc mockMvc
 
-    def setupSpec() {
+    def setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
     }
 

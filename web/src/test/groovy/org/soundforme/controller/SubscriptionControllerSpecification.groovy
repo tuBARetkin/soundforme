@@ -42,10 +42,12 @@ class SubscriptionControllerSpecification extends Specification {
     @Inject
     def SubscriptionRepository subscriptionRepository
     @Inject
+    def SubscriptionService subscriptionService
+    @Inject
     def ReleaseRepository releaseRepository;
 
     def MockMvc mockMvc
-    def subscriptionService = Mock(SubscriptionService)
+    def mockSubscriptionService = Mock(SubscriptionService)
 
     void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
@@ -53,7 +55,7 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return new subscription with 201 code if label or artist exists in discogs or in db"() {
         setup:
-        subscriptionController.subscriptionService = subscriptionService
+        subscriptionController.subscriptionService = mockSubscriptionService
 
         when:
         def response = mockMvc.perform(post("/subscriptions")
@@ -61,7 +63,7 @@ class SubscriptionControllerSpecification extends Specification {
         )
 
         then:
-        1 * subscriptionService.follow("a100") >> new Subscription([
+        1 * mockSubscriptionService.follow("a100") >> new Subscription([
                 type: SubscriptionType.ARTIST,
                 discogsId: 100,
                 title: "testArtist"
@@ -75,7 +77,7 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return 400 code if label or artist not found"() {
         setup:
-        subscriptionController.subscriptionService = subscriptionService
+        subscriptionController.subscriptionService = mockSubscriptionService
 
         when:
         def response = mockMvc.perform(post("/subscriptions")
@@ -83,7 +85,7 @@ class SubscriptionControllerSpecification extends Specification {
         )
 
         then:
-        1 * subscriptionService.follow("a100") >> null
+        1 * mockSubscriptionService.follow("a100") >> null
         response.andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("message").value("Subscription a100 not found"))
@@ -91,7 +93,7 @@ class SubscriptionControllerSpecification extends Specification {
 
     def "controller should return 400 code if connection to discogs problems"() {
         setup:
-        subscriptionController.subscriptionService = subscriptionService
+        subscriptionController.subscriptionService = mockSubscriptionService
 
         when:
         def response = mockMvc.perform(post("/subscriptions")
@@ -99,7 +101,7 @@ class SubscriptionControllerSpecification extends Specification {
         )
 
         then:
-        1 * subscriptionService.follow("a100") >> {throw new DiscogsConnectionException()}
+        1 * mockSubscriptionService.follow("a100") >> {throw new DiscogsConnectionException()}
         response.andExpect(status().isBadRequest())
                 .andExpect(status().reason("Error on connection to discogs"))
     }
@@ -114,6 +116,7 @@ class SubscriptionControllerSpecification extends Specification {
         def subscription = createRandomSubscription(true, 500, false)
         subscription.releases = releases[0..1]
         subscription = subscriptionRepository.save(subscription)
+        subscriptionController.subscriptionService = subscriptionService
 
         when:
         def response = mockMvc.perform(get("/subscriptions/{id}/releases", subscription.id))
@@ -131,6 +134,7 @@ class SubscriptionControllerSpecification extends Specification {
     def "controller should return empty array as result of getting releases of empty subscription"() {
         setup:
         def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false))
+        subscriptionController.subscriptionService = subscriptionService
 
         when:
         def response = mockMvc.perform(get("/subscriptions/{id}/releases", subscription.id))
@@ -145,6 +149,7 @@ class SubscriptionControllerSpecification extends Specification {
     def "controller should return NOT_FOUND error if subscription not found"() {
         when:
         def response = mockMvc.perform(get("/subscriptions/1/releases"))
+        subscriptionController.subscriptionService = subscriptionService
 
         then:
         response.andExpect(status().isNotFound())
@@ -157,6 +162,7 @@ class SubscriptionControllerSpecification extends Specification {
         subscriptionRepository.save(createRandomSubscription(true, 500, false))
         subscriptionRepository.save(createRandomSubscription(false, 501, false))
         subscriptionRepository.save(createRandomSubscription(true, 502, true))
+        subscriptionController.subscriptionService = subscriptionService
 
         when:
         def response = mockMvc.perform(get("/subscriptions") )
@@ -177,6 +183,7 @@ class SubscriptionControllerSpecification extends Specification {
     def "controller should return all empty list if no subscriptions"() {
         when:
         def response = mockMvc.perform(get("/subscriptions"))
+        subscriptionController.subscriptionService = subscriptionService
 
         then:
         response.andExpect(status().isOk())
@@ -188,6 +195,7 @@ class SubscriptionControllerSpecification extends Specification {
     def "unsubscribe should not work with not existed entities, NOT_FOUND status expected"() {
         when:
         def response = mockMvc.perform(delete("/subscriptions/wrongID"))
+        subscriptionController.subscriptionService = subscriptionService
 
         then:
         response.andExpect(status().isNotFound())
@@ -197,6 +205,7 @@ class SubscriptionControllerSpecification extends Specification {
     def "unsubscribe should change status of subscription to closed"() {
         setup:
         def subscription = subscriptionRepository.save(createRandomSubscription(true, 500, false))
+        subscriptionController.subscriptionService = subscriptionService
 
         when:
         def response = mockMvc.perform(delete("/subscriptions/{id}", subscription.id))
