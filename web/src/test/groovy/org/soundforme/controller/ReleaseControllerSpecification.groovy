@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.inject.Inject
@@ -37,15 +38,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ReleaseControllerSpecification extends Specification {
     @Inject
     def WebApplicationContext webApplicationContext;
+
     @Inject
     def ReleaseController releaseController
     @Inject
     def ReleaseRepository releaseRepository
 
+    @Shared
     def MockMvc mockMvc
-    def releaseService = Mock(ReleaseService)
 
-    void setup() {
+    def setupSpec() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
     }
 
@@ -58,7 +60,8 @@ class ReleaseControllerSpecification extends Specification {
         ]
 
         when:
-        def response = mockMvc.perform(put("/releases/{id}", id)
+        def response = mockMvc.perform(put("/releases/{id}", releases[number].id)
+                .contentType("application/json;charset=UTF-8")
                 .content(new Gson().toJson(new Release([
                 discogsId: anotherDisogsId,
                 starred: starred,
@@ -69,26 +72,29 @@ class ReleaseControllerSpecification extends Specification {
 
         then:
         response.andExpect(status().isOk())
-        def result = releaseRepository.findByDiscogsId(id)
+        def result = releaseRepository.findOne(releases[number].id)
         assertThat(result).isEqualToIgnoringGivenFields(releases.find {it.id == result.id}, "starred", "checked")
         assertThat(result).isNotEqualTo(releases.find {it.id == result.id})
 
         where:
-        id      | anotherDisogsId   | starred   | checked   | anotherReleaseDate
-        "100"   | 100               | true      | false     | "9999"
-        "200"   | 999               | false     | true      | "2015"
-        "300"   | 999               | true      | true      | "9999"
+        number  | anotherDisogsId   | starred   | checked   | anotherReleaseDate
+        0       | 100               | true      | false     | "9999"
+        1       | 999               | false     | true      | "2015"
+        2       | 999               | true      | true      | "9999"
     }
 
     def "update should change both of starred and checked fields in one request"() {
         setup:
-        releaseRepository.save(createRandomRelease(100))
-        releaseRepository.save(createRandomRelease(200))
-        releaseRepository.save(createRandomRelease(300))
-        releaseRepository.save(createRandomRelease(400, true, true))
+        def releases = [
+                releaseRepository.save(createRandomRelease(100)),
+                releaseRepository.save(createRandomRelease(200)),
+                releaseRepository.save(createRandomRelease(300)),
+                releaseRepository.save(createRandomRelease(400, true, true))
+        ]
 
         when:
-        def response = mockMvc.perform(put("/releases/{id}", id)
+        def response = mockMvc.perform(put("/releases/{id}", releases[number].id)
+                .contentType("application/json;charset=UTF-8")
                 .content(new Gson().toJson(new Release([
                         starred: starred,
                         checked: checked
@@ -97,16 +103,16 @@ class ReleaseControllerSpecification extends Specification {
 
         then:
         response.andExpect(status().isOk())
-        def result = releaseRepository.findByDiscogsId(id)
+        def result = releaseRepository.findOne(releases[number].id)
         assertThat(result.starred).isEqualTo(starred)
         assertThat(result.checked).isEqualTo(checked)
 
         where:
-        id      | starred   | checked
-        "100"   | true      | false
-        "200"   | false     | true
-        "300"   | true      | true
-        "400"   | false     | false
+        number  | starred   | checked
+        0       | true      | false
+        1       | false     | true
+        2       | true      | true
+        3       | false     | false
     }
 
     def "findAll should return expected page of releases"() {
