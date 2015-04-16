@@ -1,8 +1,10 @@
 package org.soundforme.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Set;
 
@@ -17,12 +19,17 @@ public class Subscription {
     private String id;
 
     private String title;
+    @Indexed
     private SubscriptionType type;
+    @Indexed @Field("d")
     private Integer discogsId;
+    @Field("cR")
     private Set<Integer> collectedReleases;
+    @Field("c")
     private Boolean closed;
 
     @DBRef
+    @Field("r")
     private Set<Release> releases;
 
     public String getId() {

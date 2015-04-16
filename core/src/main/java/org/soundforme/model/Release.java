@@ -1,7 +1,9 @@
 package org.soundforme.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,15 +15,25 @@ import java.util.List;
 public class Release {
     @Id
     private String id;
+    @Indexed @Field("d")
     private Integer discogsId;
+    @Field("a")
     private String artist;
+    @Field("t")
     private String title;
+    @Field("rD")
     private String releaseDate;
+    @Field("cD")
     private LocalDateTime collectedDate;
+    @Field("l")
     private String label;
+    @Field("cN")
     private String catNo;
+    @Field("c")
     private Boolean checked;
+    @Indexed @Field("s")
     private Boolean starred;
+    @Field("tL")
     private List<Track> trackList;
 
     public String getId() {
