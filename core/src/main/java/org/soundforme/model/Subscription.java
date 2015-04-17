@@ -17,11 +17,10 @@ import static com.google.common.collect.Sets.newHashSet;
 public class Subscription {
     @Id
     private String id;
-
     private String title;
     @Indexed
     private SubscriptionType type;
-    @Indexed @Field("d")
+    @Indexed @Field("dI")
     private Integer discogsId;
     @Field("cR")
     private Set<Integer> collectedReleases;

@@ -15,7 +15,7 @@ import java.util.List;
 public class Release {
     @Id
     private String id;
-    @Indexed @Field("d")
+    @Indexed @Field("dI")
     private Integer discogsId;
     @Field("a")
     private String artist;

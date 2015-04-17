@@ -1,11 +1,16 @@
 package org.soundforme.model;
 
+import org.springframework.data.mongodb.core.mapping.Field;
+
 /**
  * @author NGorelov
  */
 public class Track {
+    @Field("t")
     private String title;
+    @Field("d")
     private String duration;
+    @Field("p")
     private String position;
 
     public String getTitle() {
