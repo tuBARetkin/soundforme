@@ -214,7 +214,20 @@ class SubscriptionControllerSpecification extends Specification {
         response.andExpect(status().isOk())
         assertThat(subscriptionRepository.findOne(subscription.id).closed).isTrue()
     }
-    
+
+    def "subscription refresh should init refreshing of releases"() {
+        setup:
+        subscriptionController.subscriptionService = mockSubscriptionService
+
+        when:
+        def response = mockMvc.perform(get("/subscriptions/refresh"))
+
+        then:
+        response.andExpect(status().isOk())
+        1 * mockSubscriptionService.refresh()
+
+    }
+
     void cleanup() {
         subscriptionRepository.deleteAll()
         releaseRepository.deleteAll()

@@ -71,6 +71,11 @@ public class SubscriptionController {
         return result;
     }
 
+    @RequestMapping(value = "/subscriptions/refresh", method = RequestMethod.GET)
+    public void refresh() {
+        subscriptionService.refresh();
+    }
+
     @RequestMapping(value = "/subscriptions/{id}", method = RequestMethod.DELETE)
     public void unsubscribe(@PathVariable("id") String id) {
         subscriptionService.unsubscribe(id);
