@@ -78,7 +78,6 @@ public class SubscriptionController {
     }
 
     @RequestMapping(value = "/subscriptions/{id}", method = RequestMethod.DELETE)
-    @ResponseStatus(HttpStatus.ACCEPTED)
     public Callable<?> unsubscribe(@PathVariable("id") String id) {
         return () -> {
             subscriptionService.unsubscribe(id);
