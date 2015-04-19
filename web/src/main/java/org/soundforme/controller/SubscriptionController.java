@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -77,7 +78,11 @@ public class SubscriptionController {
     }
 
     @RequestMapping(value = "/subscriptions/{id}", method = RequestMethod.DELETE)
-    public void unsubscribe(@PathVariable("id") String id) {
-        subscriptionService.unsubscribe(id);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Callable<?> unsubscribe(@PathVariable("id") String id) {
+        return () -> {
+            subscriptionService.unsubscribe(id);
+            return null;
+        };
     }
 }
