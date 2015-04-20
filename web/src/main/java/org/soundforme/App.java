@@ -27,8 +27,5 @@ public class App implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Subscription subscription = new Subscription();
-        subscription.setTitle("test");
-        subscriptionRepository.save(subscription);
     }
 }
